@@ -9,6 +9,7 @@ use std::{
 use base64::prelude::*;
 
 use crate::visuals_tui::{
+    error::LoadError,
     image_display_message::{
         Action, EncodeMessage, ImageDisplayParam, ImageId, ImagePlacementId, Message, SupressLevel,
         TransmitParam,
@@ -86,8 +87,10 @@ impl Image {
         })
     }
 
-    pub fn load(image: ImageType) -> io::Result<ImageId> {
-        if !image.verify_integrity()? {}
+    pub fn load(image: ImageType) -> Result<ImageId, LoadError> {
+        if !image.verify_integrity()? {
+            return Err(LoadError::NotFoundError);
+        }
         let raw_id = ALLOCATOR_ID.fetch_add(1, Ordering::SeqCst);
         // we should crash if a non valid id has been reached
         let id = ImageId::new(raw_id).expect("valid allocation");

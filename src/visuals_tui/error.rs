@@ -2,9 +2,10 @@ use std::error::Error;
 use std::io;
 
 #[derive(Debug)]
-enum LoadError {
+pub enum LoadError {
     IOError(io::Error),
     DisplayError,
+    NotFoundError,
 }
 
 impl From<io::Error> for LoadError {
