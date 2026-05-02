@@ -1,15 +1,8 @@
-use std::error::Error;
 use std::io;
 
-#[derive(Debug)]
+#[derive(Debug, derive_more::Display, derive_more::Error, derive_more::From)]
 pub enum LoadError {
-    IOError(io::Error),
-    DisplayError,
-    NotFoundError,
-}
-
-impl From<io::Error> for LoadError {
-    fn from(value: io::Error) -> Self {
-        Self::IOError(value)
-    }
+    IO(io::Error),
+    Display,
+    NotFound,
 }

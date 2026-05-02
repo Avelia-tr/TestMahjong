@@ -2,13 +2,14 @@ use std::io::{self, Read};
 
 use crate::visuals_tui::{
     display_screen::DisplayScreen,
+    error::LoadError,
     image_display::Image,
     image_display_message::{CursorMovementMode, ImageDisplayParam},
     image_type::ImageType,
 };
 
 // shows 2 images and quit on input
-pub fn example_1() -> io::Result<()> {
+pub fn example_1() -> Result<(), LoadError> {
     let screen = DisplayScreen::enable()?;
 
     let cat_path = "/home/avelia/bevyProject/testMahjong/Ressources/pngtree-pink-cute-cat-icon-animal-png-yuri-png-image_5230763.png".into();

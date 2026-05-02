@@ -6,3 +6,4 @@ edition = "2024"
 [dependencies]
 base64 = "0.22.1"
 crossterm = "0.29.0"
+derive_more = { version = "2.1", features = ["from","error","display"] }

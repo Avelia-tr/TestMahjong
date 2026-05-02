@@ -1,15 +1,13 @@
-use std::io;
+use std::{io, marker::PhantomData};
 
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 
-pub(crate) const ESC: &[u8] = b"\x1B";
-
-pub struct Rawmodder;
+pub struct Rawmodder(());
 
 impl Rawmodder {
     pub fn enable() -> io::Result<Rawmodder> {
         enable_raw_mode()?;
-        Ok(Rawmodder)
+        Ok(Rawmodder(()))
     }
 }
 

@@ -28,7 +28,7 @@ pub struct Image {
 }
 
 impl Image {
-    pub fn new(image: ImageType) -> io::Result<Self> {
+    pub fn new(image: ImageType) -> Result<Image, LoadError> {
         let id = Self::load(image)?;
 
         Ok(Self {
@@ -89,7 +89,7 @@ impl Image {
 
     pub fn load(image: ImageType) -> Result<ImageId, LoadError> {
         if !image.verify_integrity()? {
-            return Err(LoadError::NotFoundError);
+            return Err(LoadError::NotFound);
         }
         let raw_id = ALLOCATOR_ID.fetch_add(1, Ordering::SeqCst);
         // we should crash if a non valid id has been reached
@@ -135,8 +135,10 @@ fn create_message(header: Message, payload: Vec<u8>) -> Vec<u8> {
     let mut v = vec![];
     v.extend_from_slice(PREFIX);
     v.extend_from_slice(&header.encode());
-    v.extend_from_slice(SEPARATOR);
-    v.extend_from_slice(BASE64_STANDARD.encode(payload).as_bytes());
+    if !payload.is_empty() {
+        v.extend_from_slice(SEPARATOR);
+        v.extend_from_slice(BASE64_STANDARD.encode(payload).as_bytes());
+    }
     v.extend_from_slice(SUFFIX);
     v
 }

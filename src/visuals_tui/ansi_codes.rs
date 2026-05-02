@@ -1,3 +1,5 @@
+pub const ESC: u8 = b'\x1B';
+
 pub const DELIMITER: &[u8] = b";";
 
 pub const ERASE_SCREEN: &[u8] = b"\x1B[2J";
