@@ -1,34 +1,37 @@
-use std::io::{self, Read, StdinLock, stdin};
+use core::str;
+use std::{
+    char,
+    io::{self, BufRead},
+};
 
-use crate::visuals_tui::{ansi_codes, utils::Rawmodder};
+use crate::visuals_tui::{
+    error::{OKAnswer, ParsingError, ParsingErrorKind},
+    image_display_message::{ImageId, ImageNumber},
+    utils::Rawmodder,
+};
 
-macro_rules! expect_char {
-    ($char:expr, $reader:expr) => {
-        if !consume_char($char, &mut $reader)? {
-            // TODO unexpected character
-            return Ok(());
-        }
+type ParseResult<T> = Result<T, ParsingError>;
+
+pub(super) fn parse_error_kitty(_raw_mod: &Rawmodder) -> ParseResult<OKAnswer> {
+    let answer = fetch_answer()?;
+
+    let answer_stripped = answer
+        .strip_prefix("\x1B_G")
+        .expect("[TODO] handle no prefix found")
+        .strip_suffix("\x1B\x5c")
+        .expect("[TODO] handle no suffix found");
+
+    let Some((parameter, answer)) = answer.split_once(";") else {
+        todo!()
     };
-}
 
-pub(super) fn parse_error(_raw_mod: &Rawmodder) -> io::Result<()> {
-    let mut answer_channel = stdin().lock();
+    // do shit with param ?
 
-    expect_char!(ansi_codes::ESC, answer_channel);
-    expect_char!(b'_', answer_channel);
-    expect_char!(b'G', answer_channel);
+    if answer == "OK" {
+        todo!()
+    }
 
-    // i= digits ?
-
-    expect_char!(b';', answer_channel);
+    // parse answer
 
     todo!()
-}
-
-fn consume_char(char: u8, answer_channel: &mut StdinLock) -> io::Result<bool> {
-    let mut buf = [0u8];
-
-    answer_channel.read_exact(&mut buf)?;
-
-    Ok(buf[0] == char)
 }

@@ -2,7 +2,7 @@ use std::io::{self, Write};
 
 use crate::visuals_tui::{ansi_codes, utils::Rawmodder};
 
-pub struct DisplayScreen;
+pub struct DisplayScreen(());
 
 impl DisplayScreen {
     pub fn enable() -> io::Result<DisplayScreen> {
@@ -13,12 +13,12 @@ impl DisplayScreen {
         out.save_screen()?;
         out.save_cursor()?;
         out.erase_screen()?;
-        //out.move_cursor_home()?;
+        out.move_cursor_home()?;
 
-        out.write_all(b"\x1B[20;20H")?;
+        //out.write_all(b"\x1B[20;20H")?;
 
         drop(guard);
-        Ok(DisplayScreen)
+        Ok(DisplayScreen(()))
     }
 }
 

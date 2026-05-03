@@ -1,4 +1,4 @@
-use std::{io, marker::PhantomData};
+use std::io;
 
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 
