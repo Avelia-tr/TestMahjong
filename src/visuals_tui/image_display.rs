@@ -1,5 +1,5 @@
 use std::{
-    io::{self, Error, Write, stdout},
+    io::{self, Write, stdout},
     sync::{
         Arc,
         atomic::{AtomicU32, Ordering},

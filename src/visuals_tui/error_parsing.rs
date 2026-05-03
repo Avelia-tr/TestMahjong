@@ -1,19 +1,15 @@
 use core::str;
 use std::{
-    char,
+    error::Error,
     io::{self, BufRead},
 };
 
-use crate::visuals_tui::{
-    error::{OKAnswer, ParsingError, ParsingErrorKind},
-    image_display_message::{ImageId, ImageNumber},
-    utils::Rawmodder,
-};
+use crate::visuals_tui::{error::TerminalError, utils::Rawmodder};
 
-type ParseResult<T> = Result<T, ParsingError>;
-
-pub(super) fn parse_error_kitty(_raw_mod: &Rawmodder) -> ParseResult<OKAnswer> {
-    let answer = fetch_answer()?;
+pub(super) fn parse_error_kitty(
+    _raw_mod: &Rawmodder,
+) -> Result<Result<OkAnswer, TerminalError>, Box<dyn Error>> {
+    let answer = fetch_answer().unwrap();
 
     let answer_stripped = answer
         .strip_prefix("\x1B_G")
@@ -33,5 +29,18 @@ pub(super) fn parse_error_kitty(_raw_mod: &Rawmodder) -> ParseResult<OKAnswer> {
 
     // parse answer
 
+    match answer.split_once(":") {
+        Some(x) => x.into(),
+        None => todo!(),
+    }
+
     todo!()
+}
+
+fn fetch_answer() -> io::Result<String> {
+    let mut answer_channel = io::stdin().lock();
+    let mut buf = vec![];
+    answer_channel.read_until(b'\x5c', &mut buf)?;
+
+    String::from_utf8(buf).map_err(|x| todo!())
 }

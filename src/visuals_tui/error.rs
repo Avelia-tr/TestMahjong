@@ -1,4 +1,4 @@
-use std::{io, string};
+use std::io;
 
 use crate::visuals_tui::image_display_message::{ImageId, ImageNumber};
 
@@ -7,46 +7,41 @@ pub struct OKAnswer(pub ImageId, pub Option<ImageNumber>);
 #[derive(Debug, derive_more::Display, derive_more::Error, derive_more::From)]
 pub enum LoadError {
     IO(io::Error),
-    Display,
+    Display(),
     NotFound,
     UnRecognizedError,
 }
 
-#[derive(Debug, derive_more::Display, derive_more::Error)]
-#[display("error {kind} in {}",origin.replace("\x1B", "<ESC>"))]
-pub struct ParsingError {
-    pub kind: ParsingErrorKind,
-    pub origin: String,
+#[derive(derive_more::Display, derive_more::Error, Debug)]
+pub enum TerminalError {
+    #[error(ignore)]
+    NoEntity(String),
+    #[error(ignore)]
+    InvalidArgument(String),
+    #[error(ignore)]
+    BadFile(String),
+    #[error(ignore)]
+    NoData(String),
+    #[error(ignore)]
+    FileTooLarge(String),
+    #[display("found unknown code {code} : {message}")]
+    Unknown { code: String, message: String },
 }
 
-#[derive(Debug, derive_more::Display)]
-pub enum ParsingErrorKind {
-    #[display("expected {expected_char} at {at} got {got_char}")]
-    UnexpectedCharacter {
-        expected_char: char,
-        got_char: char,
-        at: usize,
-    },
-    UnRecognizedErrorCode,
-    IO(io::Error),
-    NonValidUtf8Read(string::FromUtf8Error),
-    InvalidDigit(u32),
-}
+impl From<(&str, &str)> for TerminalError {
+    fn from((error_code, answer_str): (&str, &str)) -> Self {
+        let answer = answer_str.to_owned();
 
-impl From<io::Error> for ParsingError {
-    fn from(value: io::Error) -> Self {
-        Self {
-            kind: ParsingErrorKind::IO(value),
-            origin: String::new(),
-        }
-    }
-}
-
-impl From<string::FromUtf8Error> for ParsingError {
-    fn from(value: string::FromUtf8Error) -> Self {
-        Self {
-            kind: ParsingErrorKind::NonValidUtf8Read(value),
-            origin: String::new(),
+        match error_code {
+            "ENOENT" => Self::NoEntity(answer),
+            "EINVAL" => Self::InvalidArgument(answer),
+            "EBADF" => Self::BadFile(answer),
+            "ENODATA" => Self::NoData(answer),
+            "EFBIG" => Self::FileTooLarge(answer),
+            x => Self::Unknown {
+                code: x.to_owned(),
+                message: answer,
+            },
         }
     }
 }
