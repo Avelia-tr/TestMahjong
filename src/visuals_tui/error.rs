@@ -6,9 +6,15 @@ pub struct OKAnswer;
 #[derive(Debug, derive_more::Display, derive_more::Error, derive_more::From)]
 pub enum MessageError {
     IO(io::Error),
-    Display(),
-    NotFound,
-    UnRecognizedError,
+    Terminal(TerminalError),
+    Parsing(ParsingError),
+}
+
+#[derive(Debug, derive_more::Display, derive_more::Error, derive_more::From)]
+pub enum LoadError {
+    MessageFailed(MessageError),
+    FileNotFound,
+    IO(io::Error),
 }
 
 #[derive(derive_more::Display, derive_more::Error, Debug)]

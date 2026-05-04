@@ -1,9 +1,9 @@
-use std::{fs, io};
+use std::{fs, io, os::unix::ffi::OsStrExt, path::PathBuf};
 
 use crate::visuals_tui::image_display_message::{ImageFormat, ImageTransmitMedium};
 
 pub enum ImageType {
-    PNGPath(String),
+    PNGPath(PathBuf),
     PNGData(Vec<u8>),
 }
 
@@ -31,7 +31,7 @@ impl ImageType {
 
     pub fn get_payload(&self) -> Vec<u8> {
         match self {
-            ImageType::PNGPath(x) => x.clone().into_bytes(),
+            ImageType::PNGPath(x) => x.as_os_str().as_bytes().into(),
             ImageType::PNGData(x) => x.clone(),
         }
     }

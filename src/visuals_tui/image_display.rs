@@ -9,7 +9,8 @@ use std::{
 use base64::prelude::*;
 
 use crate::visuals_tui::{
-    error::MessageError,
+    error::{LoadError, MessageError},
+    error_parsing::parse_error_kitty,
     image_display_message::{
         Action, EncodeMessage, ImageDisplayParam, ImageId, ImagePlacementId, Message, SupressLevel,
         TransmitParam,
@@ -28,7 +29,7 @@ pub struct Image {
 }
 
 impl Image {
-    pub fn new(image: ImageType) -> Result<Image, MessageError> {
+    pub fn new(image: ImageType) -> Result<Image, LoadError> {
         let id = Self::load(image)?;
 
         Ok(Self {
@@ -38,7 +39,7 @@ impl Image {
         })
     }
 
-    pub fn display_simple(&self) -> io::Result<()> {
+    pub fn display_simple(&self) -> Result<(), MessageError> {
         send_message(
             Message(
                 Action::Put(
@@ -46,7 +47,7 @@ impl Image {
                     Some(self.placement_id),
                     ImageDisplayParam::default(),
                 ),
-                Some(SupressLevel::Everything),
+                None,
             ),
             vec![],
         )?;
@@ -54,11 +55,11 @@ impl Image {
         Ok(())
     }
 
-    pub fn display_custom(&self, display_param: ImageDisplayParam) -> io::Result<()> {
+    pub fn display_custom(&self, display_param: ImageDisplayParam) -> Result<(), MessageError> {
         send_message(
             Message(
                 Action::Put(self.id, self.placement_id.into(), display_param),
-                Some(SupressLevel::Everything),
+                None,
             ),
             vec![],
         )?;
@@ -66,7 +67,7 @@ impl Image {
         Ok(())
     }
 
-    pub fn clone_display(&self, display_param: ImageDisplayParam) -> io::Result<Self> {
+    pub fn clone_display(&self, display_param: ImageDisplayParam) -> Result<Self, MessageError> {
         self.used_placement_id.fetch_add(1, Ordering::SeqCst);
         send_message(
             Message(
@@ -87,9 +88,9 @@ impl Image {
         })
     }
 
-    pub fn load(image: ImageType) -> Result<ImageId, MessageError> {
+    pub fn load(image: ImageType) -> Result<ImageId, LoadError> {
         if !image.verify_integrity()? {
-            return Err(MessageError::NotFound);
+            return Err(LoadError::FileNotFound);
         }
         let raw_id = ALLOCATOR_ID.fetch_add(1, Ordering::SeqCst);
         // we should crash if a non valid id has been reached
@@ -116,22 +117,27 @@ const PREFIX: &[u8] = b"\x1B_G";
 const SEPARATOR: &[u8] = b";";
 const SUFFIX: &[u8] = b"\x1B\\";
 
-pub fn send_message(header: Message, payload: Vec<u8>) -> io::Result<()> {
+pub fn send_message(header: Message, payload: Vec<u8>) -> Result<(), MessageError> {
     let guard = Rawmodder::enable()?;
 
     let mut out = stdout().lock();
 
-    out.write_all(&create_message(header, payload))?;
+    out.write_all(&create_message(&header, payload))?;
     out.flush()?;
 
-    // TODO: find a way to handle answer from out
+    if header
+        .1
+        .is_none_or(|x| matches!(x, SupressLevel::Everything))
+    {
+        let _ = parse_error_kitty(&guard)??;
+    }
 
     drop(guard);
 
     Ok(())
 }
 
-fn create_message(header: Message, payload: Vec<u8>) -> Vec<u8> {
+fn create_message(header: &Message, payload: Vec<u8>) -> Vec<u8> {
     let mut v = vec![];
     v.extend_from_slice(PREFIX);
     v.extend_from_slice(&header.encode());

@@ -1,18 +1,25 @@
-use std::io::{self, Read};
+use std::{
+    env::current_dir,
+    io::{self, Read},
+    path::PathBuf,
+};
 
 use crate::visuals_tui::{
     display_screen::DisplayScreen,
-    error::MessageError,
+    error::{LoadError, MessageError},
     image_display::Image,
     image_display_message::{CursorMovementMode, ImageDisplayParam},
     image_type::ImageType,
 };
 
+const RESSOURCE: &str = "Ressources";
+const CAT_PATH: &str = "pngtree-pink-cute-cat-icon-animal-png-yuri-png-image_5230763.png";
+
 // shows 2 images and quit on input
-pub fn example_1() -> Result<(), MessageError> {
+pub fn example_1() -> Result<(), LoadError> {
     let screen = DisplayScreen::enable()?;
 
-    let cat_path = "/home/avelia/bevyProject/testMahjong/Ressources/pngtree-pink-cute-cat-icon-animal-png-yuri-png-image_5230763.png".into();
+    let cat_path = PathBuf::from_iter([current_dir().unwrap(), RESSOURCE.into(), CAT_PATH.into()]);
 
     let image = Image::new(ImageType::PNGPath(cat_path))?;
     let image2 = Image::new(ImageType::PNGData(get_image_data()))?;
