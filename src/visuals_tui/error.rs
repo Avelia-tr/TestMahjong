@@ -1,8 +1,11 @@
-use std::io;
+use core::str;
+use std::{io, string};
+
+use derive_more::From;
 
 use crate::visuals_tui::image_display_message::{ImageId, ImageNumber};
 
-pub struct OKAnswer(pub ImageId, pub Option<ImageNumber>);
+pub struct OKAnswer;
 
 #[derive(Debug, derive_more::Display, derive_more::Error, derive_more::From)]
 pub enum LoadError {
@@ -44,4 +47,30 @@ impl From<(&str, &str)> for TerminalError {
             },
         }
     }
+}
+
+#[derive(derive_more::Display, derive_more::Error, Debug)]
+pub enum AnswerReadingError {
+    IO(io::Error),
+    NonUtf8(string::FromUtf8Error),
+}
+
+impl From<string::FromUtf8Error> for AnswerReadingError {
+    fn from(value: string::FromUtf8Error) -> Self {
+        Self::NonUtf8(value)
+    }
+}
+impl From<io::Error> for AnswerReadingError {
+    fn from(value: io::Error) -> Self {
+        Self::IO(value)
+    }
+}
+
+#[derive(derive_more::Display, derive_more::Error, Debug, derive_more::From)]
+pub enum ParsingError {
+    FailedReading(AnswerReadingError),
+    NoPrefixFound,
+    NoSuffixFound,
+    NoDelimiterFound,
+    InvalidlyformedTerminalAnswer,
 }

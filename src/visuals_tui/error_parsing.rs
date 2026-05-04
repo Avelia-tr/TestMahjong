@@ -1,46 +1,41 @@
-use core::str;
-use std::{
-    error::Error,
-    io::{self, BufRead},
-};
+use std::io::{self, BufRead};
 
-use crate::visuals_tui::{error::TerminalError, utils::Rawmodder};
+use crate::visuals_tui::{
+    error::{AnswerReadingError, OKAnswer, ParsingError, TerminalError},
+    utils::Rawmodder,
+};
 
 pub(super) fn parse_error_kitty(
     _raw_mod: &Rawmodder,
-) -> Result<Result<OkAnswer, TerminalError>, Box<dyn Error>> {
-    let answer = fetch_answer().unwrap();
+) -> Result<Result<OKAnswer, TerminalError>, ParsingError> {
+    let answer = fetch_answer()?;
 
     let answer_stripped = answer
         .strip_prefix("\x1B_G")
-        .expect("[TODO] handle no prefix found")
+        .ok_or(ParsingError::NoPrefixFound)?
         .strip_suffix("\x1B\x5c")
-        .expect("[TODO] handle no suffix found");
+        .ok_or(ParsingError::NoSuffixFound)?;
 
-    let Some((parameter, answer)) = answer.split_once(";") else {
-        todo!()
+    let Some((_parameter, terminal_answer)) = answer_stripped.split_once(";") else {
+        return Err(ParsingError::NoDelimiterFound);
     };
 
     // do shit with param ?
 
-    if answer == "OK" {
-        todo!()
+    if terminal_answer == "OK" {
+        return Ok(Ok(OKAnswer));
     }
 
-    // parse answer
-
-    match answer.split_once(":") {
-        Some(x) => x.into(),
-        None => todo!(),
+    match terminal_answer.split_once(":") {
+        Some(x) => Ok(Err(x.into())),
+        None => Err(ParsingError::InvalidlyformedTerminalAnswer),
     }
-
-    todo!()
 }
 
-fn fetch_answer() -> io::Result<String> {
+fn fetch_answer() -> Result<String, AnswerReadingError> {
     let mut answer_channel = io::stdin().lock();
     let mut buf = vec![];
     answer_channel.read_until(b'\x5c', &mut buf)?;
 
-    String::from_utf8(buf).map_err(|x| todo!())
+    Ok(String::from_utf8(buf)?)
 }
