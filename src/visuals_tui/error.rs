@@ -1,14 +1,10 @@
 use core::str;
 use std::{io, string};
 
-use derive_more::From;
-
-use crate::visuals_tui::image_display_message::{ImageId, ImageNumber};
-
 pub struct OKAnswer;
 
 #[derive(Debug, derive_more::Display, derive_more::Error, derive_more::From)]
-pub enum LoadError {
+pub enum MessageError {
     IO(io::Error),
     Display(),
     NotFound,
