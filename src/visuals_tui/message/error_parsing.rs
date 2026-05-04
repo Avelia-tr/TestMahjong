@@ -1,11 +1,11 @@
 use std::io::{self, BufRead};
 
 use crate::visuals_tui::{
-    error::{AnswerReadingError, OKAnswer, ParsingError, TerminalError},
+    message::error::{AnswerReadingError, OKAnswer, ParsingError, TerminalError},
     utils::Rawmodder,
 };
 
-pub(super) fn parse_error_kitty(
+pub fn parse_error_kitty(
     _raw_mod: &Rawmodder,
 ) -> Result<Result<OKAnswer, TerminalError>, ParsingError> {
     let answer = fetch_answer()?;

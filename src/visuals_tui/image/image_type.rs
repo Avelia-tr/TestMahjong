@@ -1,6 +1,6 @@
 use std::{fs, io, os::unix::ffi::OsStrExt, path::PathBuf};
 
-use crate::visuals_tui::image_display_message::{ImageFormat, ImageTransmitMedium};
+use crate::visuals_tui::message::message_enum::{ImageFormat, ImageTransmitMedium};
 
 pub enum ImageType {
     PNGPath(PathBuf),

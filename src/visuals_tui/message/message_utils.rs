@@ -1,4 +1,4 @@
-use crate::visuals_tui::image_display_message::{ImageId, Message};
+use crate::visuals_tui::message::message_enum::*;
 
 impl Message {
     pub fn with_id(self, id: ImageId) -> Self {

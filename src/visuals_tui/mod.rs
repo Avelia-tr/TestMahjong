@@ -1,11 +1,8 @@
 mod ansi_codes;
 pub mod display_example;
 pub mod display_screen;
-pub mod error;
-mod error_parsing;
-pub mod image_display;
-pub mod image_display_message;
-pub mod image_type;
-pub mod message_utils;
+pub mod image;
+pub mod message;
+pub mod sprite;
 pub mod utils;
 pub mod window_size;

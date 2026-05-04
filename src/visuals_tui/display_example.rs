@@ -5,11 +5,8 @@ use std::{
 };
 
 use crate::visuals_tui::{
-    display_screen::DisplayScreen,
-    error::{LoadError, MessageError},
-    image_display::Image,
-    image_display_message::{CursorMovementMode, ImageDisplayParam},
-    image_type::ImageType,
+    display_screen::DisplayScreen, image::image_display::Image, image::image_type::ImageType,
+    message::error::LoadError, message::message_enum::*,
 };
 
 const RESSOURCE: &str = "Ressources";
@@ -24,12 +21,12 @@ pub fn example_1() -> Result<(), LoadError> {
     let image = Image::new(ImageType::PNGPath(cat_path))?;
     let image2 = Image::new(ImageType::PNGData(get_image_data()))?;
 
-    image.display_custom(ImageDisplayParam {
+    image.display(ImageDisplayParam {
         cursor_movement_mode: Some(CursorMovementMode::StaticAfterImage),
         ..Default::default()
     })?;
 
-    image2.display_custom(ImageDisplayParam {
+    image2.display(ImageDisplayParam {
         cursor_movement_mode: Some(CursorMovementMode::StaticAfterImage),
         z_index: Some(1),
         ..Default::default()
