@@ -35,6 +35,13 @@ impl Image {
         ))
     }
 
+    pub fn display_at(&self, display_param: ImageDisplayParam) -> Result<(), MessageError> {
+        send::send_message(Message(
+            Action::Put(self.id, self.placement_id.into(), display_param),
+            None,
+        ))
+    }
+
     pub fn load(image: ImageType) -> Result<ImageId, LoadError> {
         if !image.verify_integrity()? {
             return Err(LoadError::FileNotFound);
@@ -64,7 +71,14 @@ impl Clone for Image {
     fn clone(&self) -> Self {
         self.used_placement_id.fetch_add(1, Ordering::SeqCst);
         let new_placement_id =
-            ImagePlacementId::new(self.used_placement_id.load(Ordering::Acquire)).expect("id left");
+            match ImagePlacementId::new(self.used_placement_id.load(Ordering::Acquire)) {
+                Some(x) => x,
+                None => {
+                    self.used_placement_id.fetch_add(1, Ordering::SeqCst);
+                    ImagePlacementId::new(self.used_placement_id.load(Ordering::Acquire))
+                        .expect("valid id since we just passed through 0")
+                }
+            };
 
         Self {
             id: self.id,

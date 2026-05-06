@@ -35,4 +35,10 @@ impl ImageType {
             ImageType::PNGData(x) => x.clone(),
         }
     }
+
+    const BASE_FOLDER: &str = "Ressources/";
+
+    pub fn new_png_load(path: &str) -> io::Result<Self> {
+        std::fs::read([Self::BASE_FOLDER, path].concat()).map(ImageType::PNGData)
+    }
 }

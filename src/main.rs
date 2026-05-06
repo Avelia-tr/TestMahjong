@@ -1,4 +1,4 @@
-use std::io::{BufRead, Write, stdin, stdout};
+use std::io::{BufRead, Read, Write, stdin, stdout};
 
 use crate::visuals_tui::{display_example, utils::Rawmodder};
 
@@ -9,5 +9,7 @@ mod game;
 mod visuals_tui;
 
 fn main() {
-    display_example::example_1().unwrap();
+    let meow = display_example::example_1();
+
+    println!("{:?}", meow);
 }

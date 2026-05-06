@@ -44,6 +44,7 @@ trait OutUtils {
     fn restore_screen(&mut self) -> io::Result<()>;
     fn save_cursor(&mut self) -> io::Result<()>;
     fn restore_cursor(&mut self) -> io::Result<()>;
+    fn move_cursor_to(&mut self, x: u32, y: u32) -> io::Result<()>;
 }
 
 impl<T: Write> OutUtils for T {
@@ -72,5 +73,18 @@ impl<T: Write> OutUtils for T {
 
     fn erase_screen_to_end(&mut self) -> io::Result<()> {
         self.write_all(ansi_codes::ERASE_SCREEN_TO_END)
+    }
+
+    fn move_cursor_to(&mut self, x: u32, y: u32) -> io::Result<()> {
+        self.write_all(
+            &[
+                ansi_codes::START_MOVE_CURSOR_TO,
+                &y.to_string().into_bytes(),
+                ansi_codes::DELIMITER,
+                &x.to_string().into_bytes(),
+                ansi_codes::END_MOVE_CURSOR_TO,
+            ]
+            .concat(),
+        )
     }
 }

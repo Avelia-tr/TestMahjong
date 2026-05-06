@@ -2,6 +2,8 @@ use std::{
     env::current_dir,
     io::{self, Read},
     path::PathBuf,
+    thread,
+    time::Duration,
 };
 
 use crate::visuals_tui::{
@@ -11,15 +13,16 @@ use crate::visuals_tui::{
 
 const RESSOURCE: &str = "Ressources";
 const CAT_PATH: &str = "pngtree-pink-cute-cat-icon-animal-png-yuri-png-image_5230763.png";
+const GOOGLE_PATH: &str = "google.png";
 
 // shows 2 images and quit on input
 pub fn example_1() -> Result<(), LoadError> {
     let screen = DisplayScreen::enable()?;
 
-    let cat_path = PathBuf::from_iter([current_dir().unwrap(), RESSOURCE.into(), CAT_PATH.into()]);
+    //let cat_path = PathBuf::from_iter([current_dir().unwrap(), RESSOURCE.into(), CAT_PATH.into()]);
 
-    let image = Image::new(ImageType::PNGPath(cat_path))?;
-    let image2 = Image::new(ImageType::PNGData(get_image_data()))?;
+    let image = Image::new(ImageType::new_png_load(CAT_PATH)?)?;
+    let image2 = Image::new(ImageType::new_png_load(GOOGLE_PATH)?)?;
 
     image.display(ImageDisplayParam {
         cursor_movement_mode: Some(CursorMovementMode::StaticAfterImage),
@@ -36,8 +39,4 @@ pub fn example_1() -> Result<(), LoadError> {
 
     drop(screen);
     Ok(())
-}
-
-fn get_image_data() -> Vec<u8> {
-    std::fs::read("Ressources/google.png").expect("meow")
 }
