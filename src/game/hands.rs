@@ -35,5 +35,5 @@ impl MahjongHand {
         self.hand.iter().all(|x| x.is_closed())
     }
 
-    fn draw(&mut self) -> () {}
+    fn draw(&mut self) {}
 }

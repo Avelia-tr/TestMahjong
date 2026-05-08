@@ -1,7 +1,6 @@
 pub mod error;
 pub mod error_parsing;
 pub mod message_enum;
-pub mod message_utils;
 pub(super) mod send;
 
 #[allow(unused)]

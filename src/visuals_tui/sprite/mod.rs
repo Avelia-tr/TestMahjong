@@ -1,9 +1,9 @@
 use crate::visuals_tui::message::MessageError;
 
-mod simple_sprite;
-mod vector2;
+pub mod simple_sprite;
+pub mod vector2;
 
-trait Sprite {
-    fn display() -> Result<(), MessageError>;
-    fn update();
+pub trait Sprite {
+    fn display(&self) -> Result<(), MessageError>;
+    fn update(&mut self);
 }

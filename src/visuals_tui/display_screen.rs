@@ -36,7 +36,7 @@ impl Drop for DisplayScreen {
 }
 
 #[allow(unused)]
-trait OutUtils {
+pub trait OutUtils {
     fn erase_screen(&mut self) -> io::Result<()>;
     fn erase_screen_to_end(&mut self) -> io::Result<()>;
     fn move_cursor_home(&mut self) -> io::Result<()>;

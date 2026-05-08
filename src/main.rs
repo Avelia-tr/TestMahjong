@@ -1,6 +1,4 @@
-use std::io::{BufRead, Read, Write, stdin, stdout};
-
-use crate::visuals_tui::{display_example, utils::Rawmodder};
+use crate::visuals_tui::display_example;
 
 #[allow(unused)]
 mod game;
@@ -9,7 +7,7 @@ mod game;
 mod visuals_tui;
 
 fn main() {
-    let meow = display_example::example_1();
+    let meow = display_example::example_moving_image();
 
     println!("{:?}", meow);
 }

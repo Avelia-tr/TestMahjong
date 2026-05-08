@@ -35,13 +35,6 @@ impl Image {
         ))
     }
 
-    pub fn display_at(&self, display_param: ImageDisplayParam) -> Result<(), MessageError> {
-        send::send_message(Message(
-            Action::Put(self.id, self.placement_id.into(), display_param),
-            None,
-        ))
-    }
-
     pub fn load(image: ImageType) -> Result<ImageId, LoadError> {
         if !image.verify_integrity()? {
             return Err(LoadError::FileNotFound);

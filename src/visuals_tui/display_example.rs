@@ -1,14 +1,11 @@
-use std::{
-    env::current_dir,
-    io::{self, Read},
-    path::PathBuf,
-    thread,
-    time::Duration,
-};
+use std::io::{self, Read, stdin};
 
 use crate::visuals_tui::{
-    display_screen::DisplayScreen, image::image_display::Image, image::image_type::ImageType,
-    message::error::LoadError, message::message_enum::*,
+    display_screen::DisplayScreen,
+    image::{image_display::Image, image_type::ImageType},
+    message::{error::LoadError, message_enum::*},
+    sprite::{Sprite, simple_sprite::SimpleSprite, vector2::Vector2u},
+    utils::Rawmodder,
 };
 
 const RESSOURCE: &str = "Ressources";
@@ -38,5 +35,29 @@ pub fn example_1() -> Result<(), LoadError> {
     io::stdin().read_exact(&mut [1])?;
 
     drop(screen);
+    Ok(())
+}
+
+pub fn example_moving_image() -> Result<(), LoadError> {
+    let guard = Rawmodder::enable();
+    let screen = DisplayScreen::enable()?;
+    let mut image = SimpleSprite::new(ImageType::new_png_load(CAT_PATH)?)?;
+    let mut input_buffer: [u8; _] = [0];
+
+    loop {
+        image.display()?;
+        stdin().lock().read_exact(&mut input_buffer)?;
+        match input_buffer[0] {
+            b'w' => image.position -= Vector2u::new(0, 1),
+            b's' => image.position += Vector2u::new(0, 1),
+            b'a' => image.position -= Vector2u::new(1, 0),
+            b'd' => image.position += Vector2u::new(1, 0),
+            b'q' => break,
+            _ => (),
+        }
+    }
+
+    drop(screen);
+    drop(guard);
     Ok(())
 }
