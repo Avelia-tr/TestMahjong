@@ -15,3 +15,6 @@ pub const START_MOVE_CURSOR_TO: &[u8] = b"\x1B[";
 pub const END_MOVE_CURSOR_TO: &[u8] = b"H";
 
 pub const ERASE_SCREEN_TO_END: &[u8] = b"\x1B[J";
+
+pub const HIDE_CURSOR: &[u8] = b"\x1B[?25l";
+pub const SHOW_CURSOR: &[u8] = b"\x1B[?25h";

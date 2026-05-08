@@ -2,6 +2,8 @@ use std::io::{self, Write};
 
 use crate::visuals_tui::{ansi_codes, utils::Rawmodder};
 
+pub struct Cursor;
+
 pub struct DisplayScreen(());
 
 impl DisplayScreen {
@@ -10,6 +12,7 @@ impl DisplayScreen {
 
         let mut out = io::stdout().lock();
 
+        out.hide_cursor()?;
         out.save_screen()?;
         out.save_cursor()?;
         out.erase_screen()?;
@@ -30,6 +33,7 @@ impl Drop for DisplayScreen {
         _ = out.restore_screen();
         _ = out.restore_cursor();
         _ = out.erase_screen_to_end();
+        _ = out.show_cursor();
 
         drop(guard);
     }
@@ -45,6 +49,8 @@ pub trait OutUtils {
     fn save_cursor(&mut self) -> io::Result<()>;
     fn restore_cursor(&mut self) -> io::Result<()>;
     fn move_cursor_to(&mut self, x: u32, y: u32) -> io::Result<()>;
+    fn hide_cursor(&mut self) -> io::Result<()>;
+    fn show_cursor(&mut self) -> io::Result<()>;
 }
 
 impl<T: Write> OutUtils for T {
@@ -86,5 +92,13 @@ impl<T: Write> OutUtils for T {
             ]
             .concat(),
         )
+    }
+
+    fn hide_cursor(&mut self) -> io::Result<()> {
+        self.write_all(ansi_codes::HIDE_CURSOR)
+    }
+
+    fn show_cursor(&mut self) -> io::Result<()> {
+        self.write_all(ansi_codes::SHOW_CURSOR)
     }
 }
