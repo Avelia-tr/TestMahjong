@@ -1,4 +1,4 @@
-use std::fmt::Display;
+use std::{fmt::Display, hint::unreachable_unchecked, num::NonZeroI8};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct MahjongTile {
@@ -13,7 +13,7 @@ pub enum MahjongTilesIdentity {
     Man(NumberTile),
     Pin(NumberTile),
     Sou(NumberTile),
-    Wind(WindsTiles),
+    Wind(Wind),
     Dragon(DragonTiles),
 }
 
@@ -25,7 +25,7 @@ pub enum DragonTiles {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-pub enum WindsTiles {
+pub enum Wind {
     East,
     South,
     West,
@@ -65,17 +65,17 @@ impl NumberTile {
 
     fn get_next_one(&self) -> Self {
         match self.0 {
-            // [UNSAFE] 0 is safe value to init
-            9 => unsafe { Self::new_unchecked(0) },
-            // [UNSAFE] 1..9 are safe value to init
+            // [UNSAFE] 1 is safe value to init
+            9 => unsafe { Self::new_unchecked(1) },
+            // [UNSAFE] 2..9 are safe value to init
             0..9 => unsafe { Self::new_unchecked(self.0 + 1) },
-            _ => unreachable!(), // it is a guarantee that TileNumber is between 0 and 9 inclusive
+            _ => unreachable!("invalid state : Invariant self.0 is >= 1 and <= 9 violated"),
         }
     }
 }
 
 impl DragonTiles {
-    fn get_next_one(&self) -> Self {
+    pub fn get_next_one(&self) -> Self {
         match self {
             Self::White => Self::Green,
             Self::Green => Self::Red,
@@ -84,8 +84,8 @@ impl DragonTiles {
     }
 }
 
-impl WindsTiles {
-    fn get_next_one(&self) -> Self {
+impl Wind {
+    pub fn get_next(&self) -> Self {
         match self {
             Self::East => Self::South,
             Self::South => Self::West,
@@ -96,11 +96,11 @@ impl WindsTiles {
 }
 
 impl MahjongTilesIdentity {
-    fn is_honor(&self) -> bool {
+    pub fn is_honor(&self) -> bool {
         matches!(self, Self::Dragon(_) | Self::Wind(_))
     }
 
-    fn is_terminal(&self) -> bool {
+    pub fn is_terminal(&self) -> bool {
         matches!(
             self,
             Self::Man(NumberTile(1 | 9))
@@ -109,12 +109,12 @@ impl MahjongTilesIdentity {
         )
     }
 
-    fn get_dora(&self) -> Self {
+    pub fn get_dora(&self) -> Self {
         match self {
             Self::Man(x) => Self::Man(x.get_next_one()),
             Self::Pin(x) => Self::Pin(x.get_next_one()),
             Self::Sou(x) => Self::Sou(x.get_next_one()),
-            Self::Wind(x) => Self::Wind(x.get_next_one()),
+            Self::Wind(x) => Self::Wind(x.get_next()),
             Self::Dragon(x) => Self::Dragon(x.get_next_one()),
         }
     }
@@ -136,7 +136,7 @@ impl Display for DragonTiles {
     }
 }
 
-impl Display for WindsTiles {
+impl Display for Wind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str(match self {
             Self::East => "Ea",

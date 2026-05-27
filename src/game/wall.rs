@@ -2,16 +2,15 @@ use std::sync::Arc;
 
 use crate::game::tiles::{MahjongTile, MahjongTilesIdentity, NumberTile};
 
-pub struct MahjongWall {
-    wall_tiles: Arc<[MahjongTile]>,
-    current_index: usize,
-}
+pub trait MahjongWall {
+    fn draw(&mut self) -> Option<MahjongTile>;
+    fn draw_dead_wall(&mut self) -> MahjongTile;
+    fn reveal_dora(&mut self) -> Option<MahjongTile>;
 
-impl MahjongWall {
-    fn new(wall_tiles: Arc<[MahjongTile]>) -> Self {
-        Self {
-            wall_tiles,
-            current_index: 0,
-        }
-    }
+    fn get_dora(&self, index: usize) -> Option<MahjongTile>;
+    fn get_ura_dora(&self, index: usize) -> Option<MahjongTile>;
+    fn get_visible_doras(&self, index: usize) -> &[MahjongTile];
+    fn get_visible_ura_doras(&self, index: usize) -> &[MahjongTile];
+
+    fn poll_tile_remaining(&self) -> usize;
 }
