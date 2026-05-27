@@ -3,7 +3,7 @@ use std::io;
 use crate::visuals_tui::{
     display_screen::OutUtils,
     image::{Image, image_type::ImageType},
-    message,
+    message::{self, error::ToMessageError},
     sprite::{Sprite, vector2::Vector2u},
     utils::Rawmodder,
 };
@@ -26,6 +26,14 @@ impl SimpleSprite {
         })
     }
 
+    pub fn from_image(image: Image) -> Self {
+        Self {
+            image,
+            position: Default::default(),
+            z_index: Default::default(),
+        }
+    }
+
     pub fn with_position(self, position: Vector2u) -> Self {
         Self { position, ..self }
     }
@@ -33,8 +41,10 @@ impl SimpleSprite {
 
 impl Sprite for SimpleSprite {
     fn display(&self) -> Result<(), message::MessageError> {
-        let guard = Rawmodder::enable()?;
-        io::stdout().move_cursor_to(self.position.x, self.position.y)?;
+        let guard = Rawmodder::enable().to_error_no_msg()?;
+        io::stdout()
+            .move_cursor_to(self.position.x, self.position.y)
+            .to_error_no_msg()?;
         self.image.display(message::ImageDisplayParam {
             z_index: self.z_index.into(),
             ..Default::default()

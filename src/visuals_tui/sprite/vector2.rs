@@ -74,3 +74,49 @@ impl Vector2u {
 
 impl_vector_op!(Vector2i, x, y);
 impl_vector_op!(Vector2u, x, y);
+
+pub struct SizeVector2 {
+    pub x: Option<usize>,
+    pub y: Option<usize>,
+}
+
+fn ops_on_opt<T>(a: Option<T>, b: Option<T>, func: impl Fn(T, T) -> T) -> Option<T> {
+    match (a, b) {
+        (None, None) => None,
+        (None, Some(res)) | (Some(res), None) => Some(res),
+        (Some(f_a), Some(f_b)) => Some(func(f_a, f_b)),
+    }
+}
+
+impl ops::Add for SizeVector2 {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Self {
+            x: ops_on_opt(self.x, rhs.x, usize::add),
+            y: ops_on_opt(self.y, rhs.y, usize::add),
+        }
+    }
+}
+
+impl ops::Sub for SizeVector2 {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        Self {
+            x: ops_on_opt(self.x, rhs.x, usize::saturating_sub),
+            y: ops_on_opt(self.y, rhs.y, usize::saturating_sub),
+        }
+    }
+}
+
+impl ops::Mul for SizeVector2 {
+    type Output = Self;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        Self {
+            x: ops_on_opt(self.x, rhs.x, usize::mul),
+            y: ops_on_opt(self.y, rhs.y, usize::mul),
+        }
+    }
+}

@@ -2,6 +2,8 @@ mod ansi_codes;
 pub mod display_example;
 pub mod display_screen;
 pub mod image;
+pub mod input_event;
+pub mod kitty_input;
 pub mod message;
 pub mod sprite;
 pub mod utils;

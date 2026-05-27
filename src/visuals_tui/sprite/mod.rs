@@ -1,5 +1,6 @@
 use crate::visuals_tui::message::MessageError;
 
+pub mod relative_sprite;
 pub mod simple_sprite;
 pub mod vector2;
 

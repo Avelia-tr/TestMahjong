@@ -18,3 +18,7 @@ pub const ERASE_SCREEN_TO_END: &[u8] = b"\x1B[J";
 
 pub const HIDE_CURSOR: &[u8] = b"\x1B[?25l";
 pub const SHOW_CURSOR: &[u8] = b"\x1B[?25h";
+
+pub const EXTENSIVE_INPUT_START: &[u8] = b"\x1B\x5B>";
+pub const EXTENSIVE_INPUT_STOP: &[u8] = b"\x1B\x5B<";
+pub const EXTENSIVE_INPUT_DELEMITER: &[u8] = b"u";

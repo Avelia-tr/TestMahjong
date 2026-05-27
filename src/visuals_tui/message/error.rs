@@ -1,10 +1,42 @@
 use core::str;
 use std::{io, string};
 
+use crate::visuals_tui::message::{EncodeMessage, Message};
+
 pub struct OKAnswer;
 
+#[derive(Debug, derive_more::Display, derive_more::Error)]
+#[display("message : {message} failed because : {kind}")]
+pub struct MessageError {
+    message: String,
+    kind: MessageErrorKind,
+}
+
+pub trait ToMessageError<T> {
+    fn to_message_error(self, message: &Message) -> Result<T, MessageError>;
+    fn to_error_no_msg(self) -> Result<T, MessageError>;
+}
+
+impl<T, T2: Into<MessageErrorKind>> ToMessageError<T> for Result<T, T2> {
+    fn to_message_error(self, message: &Message) -> Result<T, MessageError> {
+        self.map_err(|kind| MessageError {
+            message: String::from_utf8(message.encode())
+                .unwrap()
+                .replace("\x1b", "␛"),
+            kind: kind.into(),
+        })
+    }
+
+    fn to_error_no_msg(self) -> Result<T, MessageError> {
+        self.map_err(|kind| MessageError {
+            message: "".into(),
+            kind: kind.into(),
+        })
+    }
+}
+
 #[derive(Debug, derive_more::Display, derive_more::Error, derive_more::From)]
-pub enum MessageError {
+pub enum MessageErrorKind {
     IO(io::Error),
     Terminal(TerminalError),
     Parsing(ParsingError),

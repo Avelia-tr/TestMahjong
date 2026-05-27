@@ -1,6 +1,6 @@
-use std::sync::{
-    Arc,
-    atomic::{AtomicU32, Ordering},
+use std::{
+    rc::Rc,
+    sync::atomic::{AtomicU32, Ordering},
 };
 
 use crate::visuals_tui::{
@@ -14,7 +14,7 @@ static ALLOCATOR_ID: AtomicU32 = AtomicU32::new(1);
 pub struct Image {
     id: ImageId,
     placement_id: ImagePlacementId,
-    used_placement_id: Arc<AtomicU32>,
+    used_placement_id: Rc<AtomicU32>,
 }
 
 impl Image {
@@ -57,6 +57,24 @@ impl Image {
         )?;
 
         Ok(id)
+    }
+
+    pub fn display_child(
+        &self,
+        child: &Self,
+        params: ImageDisplayParam,
+    ) -> Result<(), MessageError> {
+        send::send_message(Message(
+            Action::Put(
+                child.id,
+                child.placement_id.into(),
+                ImageDisplayParam {
+                    relative_placement_id: child.placement_id.into(),
+                    ..params
+                },
+            ),
+            None,
+        ))
     }
 }
 

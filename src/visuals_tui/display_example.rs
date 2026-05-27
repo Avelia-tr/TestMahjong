@@ -48,10 +48,10 @@ pub fn example_moving_image() -> Result<(), LoadError> {
         image.display()?;
         stdin().lock().read_exact(&mut input_buffer)?;
         match input_buffer[0] {
-            b'w' => image.position -= Vector2u::new(0, 1),
             b's' => image.position += Vector2u::new(0, 1),
-            b'a' => image.position -= Vector2u::new(1, 0),
+            b'w' => image.position -= Vector2u::new(0, 1),
             b'd' => image.position += Vector2u::new(1, 0),
+            b'a' => image.position -= Vector2u::new(1, 0),
             b'q' => break,
             _ => (),
         }

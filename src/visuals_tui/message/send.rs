@@ -4,7 +4,8 @@ use base64::prelude::*;
 
 use crate::visuals_tui::{
     message::{
-        EncodeMessage as _, Message, MessageError, SupressLevel, error_parsing::parse_error_kitty,
+        EncodeMessage, Message, MessageError, SupressLevel, error::ToMessageError,
+        error_parsing::parse_error_kitty,
     },
     utils::Rawmodder,
 };
@@ -14,15 +15,23 @@ const SEPARATOR: &[u8] = b";";
 const SUFFIX: &[u8] = b"\x1B\\";
 
 pub fn send_message_with_payload(header: Message, payload: Vec<u8>) -> Result<(), MessageError> {
-    let guard = Rawmodder::enable()?;
+    let guard = Rawmodder::enable().to_message_error(&header)?;
 
     let mut out = io::stdout().lock();
 
-    out.write_all(&create_message_with_payload(&header, payload))?;
-    out.flush()?;
+    out.write_all(&create_message_with_payload(&header, payload))
+        .to_message_error(&header)?;
+    out.flush().to_message_error(&header)?;
 
-    if header.1.is_none_or(|x| matches!(x, SupressLevel::None)) {
-        let _ = parse_error_kitty(&guard)??;
+    let is_error_suppressed = matches!(
+        header.1,
+        Some(SupressLevel::SuppressSuccess | SupressLevel::Everything)
+    );
+
+    if !is_error_suppressed {
+        let _ = parse_error_kitty(&guard)
+            .to_message_error(&header)?
+            .to_message_error(&header)?;
     }
 
     drop(guard);
@@ -31,15 +40,23 @@ pub fn send_message_with_payload(header: Message, payload: Vec<u8>) -> Result<()
 }
 
 pub fn send_message(message: Message) -> Result<(), MessageError> {
-    let guard = Rawmodder::enable()?;
+    let guard = Rawmodder::enable().to_message_error(&message)?;
 
     let mut out = io::stdout().lock();
 
-    out.write_all(&create_message(&message))?;
-    out.flush()?;
+    out.write_all(&create_message(&message))
+        .to_message_error(&message)?;
+    out.flush().to_message_error(&message)?;
 
-    if message.1.is_none_or(|x| matches!(x, SupressLevel::None)) {
-        let _ = parse_error_kitty(&guard)??;
+    let is_error_suppressed = match message.1 {
+        Some(SupressLevel::Everything | SupressLevel::SuppressSuccess) => true,
+        _ => false,
+    };
+
+    if !is_error_suppressed {
+        let _ = parse_error_kitty(&guard)
+            .to_message_error(&message)?
+            .to_message_error(&message)?;
     }
 
     drop(guard);
