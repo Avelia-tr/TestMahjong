@@ -1,10 +1,11 @@
 use crate::game::{
-    event::{NeedCalls, NeedChankan, NeedDiscard, ProcessRound, RoundEvent},
+    event::{NeedCalls, NeedChankan, NeedDiscard, NeedSpecial, RoundEvent},
     hands::MahjongHand,
     tiles::{MahjongTile, Wind},
     wall::MahjongWall,
 };
 
+mod container;
 mod event;
 mod four_player_mahjong;
 #[allow(unused)]
@@ -40,6 +41,7 @@ fn do_round(mut round: impl ProcessRound) {
                 end_of_round = win_info;
                 break;
             }
+            RoundEvent::SpecialRequest(request) => request.give_context(),
         };
 
         round_tick = thingy.tick();
