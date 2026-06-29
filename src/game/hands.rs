@@ -1,4 +1,6 @@
-use crate::game::tiles::MahjongTile;
+use std::io::Write;
+
+use crate::game::tiles::{MahjongTile, Wind};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 enum HandBlock {
@@ -23,10 +25,27 @@ pub enum DrawResult {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum CallResult {
     Pass,
-    Chii(MahjongTile, MahjongTile, MahjongTile),
-    Pon(MahjongTile, MahjongTile, MahjongTile),
-    OpenKan(MahjongTile, MahjongTile, MahjongTile, MahjongTile),
-    AddedKan(MahjongTile, MahjongTile, MahjongTile, MahjongTile),
+    Chii {
+        called_tile: MahjongTile,
+        othertiles: [MahjongTile; 2],
+        wind: Wind,
+    },
+    Pon {
+        called_tile: MahjongTile,
+        othertiles: [MahjongTile; 2],
+        wind: Wind,
+    },
+    OpenKan {
+        called_tile: MahjongTile,
+        othertiles: [MahjongTile; 2],
+        wind: Wind,
+    },
+    AddedKan {
+        called_tile: MahjongTile,
+        add_tile: MahjongTile,
+        othertiles: [MahjongTile; 2],
+        wind: Wind,
+    },
 }
 
 #[derive(Debug)]
@@ -53,16 +72,24 @@ impl MahjongHand {
         self.hand.iter().all(|x| x.is_closed())
     }
 
-    pub fn draw(&mut self, drawn_tile: MahjongTile) -> DrawResult {
-        todo!()
+    pub fn pon(&mut self, tiles: [MahjongTile; 3]) {
+        for i in tiles {
+            let Some(x) = self
+                .hand
+                .iter()
+                .position(|x| matches!(x, HandBlock::Unit(i)))
+            else {
+                todo!()
+            };
+
+            self.hand.swap_remove(x);
+        }
+
+        self.hand.push(HandBlock::Pon(tiles[0], tiles[1], tiles[2]));
     }
 
-    pub fn call(
-        &mut self,
-        possibilities: CallPossibility,
-        discarded_tile: MahjongTile,
-    ) -> CallResult {
-        todo!()
+    pub fn chii(&mut self, tiles: [MahjongTile; 3]) {
+        todo!();
     }
 
     pub fn can_call(&self) -> bool {

@@ -1,5 +1,5 @@
 use crate::game::{
-    event::{NeedCalls, NeedChankan, NeedDiscard, NeedSpecial, RoundEvent},
+    event::{NeedCalls, NeedDiscard, NeedSpecial, RoundEvent},
     hands::MahjongHand,
     tiles::{MahjongTile, Wind},
     wall::MahjongWall,
@@ -7,6 +7,7 @@ use crate::game::{
 
 mod container;
 mod event;
+mod event_data;
 mod four_player_mahjong;
 #[allow(unused)]
 mod hands;

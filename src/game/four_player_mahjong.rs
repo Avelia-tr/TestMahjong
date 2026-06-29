@@ -3,8 +3,8 @@ use std::marker::PhantomData;
 use crate::game::{
     container::FourPlayerStorage,
     event::{
-        self, Call, CallsDecision, ChanKanDecision, DiscardDecision, NeedCalls, NeedChankan,
-        NeedDiscard, NoSpecialRequest,
+        self, Call, CallsDecision, ChanKanDecision, DiscardDecision, NeedCalls, NeedDiscard,
+        NoCalls, NoSpecialRequest,
     },
     hands::{self, DrawResult, MahjongHand},
     tiles::{MahjongTile, Wind},
@@ -15,19 +15,19 @@ use super::event::RoundEvent;
 
 macro_rules! type_bounds {
     () => {
-        type Draw = FourPlayerRiichi<T, WaitingForDiscard>;
-        type Call = FourPlayerRiichi<T, WaitingForCalls>;
-        type ChanKan = FourPlayerRiichi<T, WaitingForKan>;
-        type Special = NoSpecialRequest<Self::Draw, Self::Call, Self::ChanKan>;
+        type Draw = FourPlayerRiichi<Wall, WaitingForDiscard>;
+        type Call = FourPlayerRiichi<Wall, WaitingForCalls>;
+        type Special = NoSpecialRequest<Self::Draw, Self::Call>;
     };
 }
 
 macro_rules! OutsideQuery {
     () => {
-        crate::game::event::RoundEvent<Self::Draw, Self::Call, Self::ChanKan, Self::Special>
+        crate::game::event::RoundEvent<Self::Draw, Self::Call, Self::Special>
     };
 }
 
+// ignoring "chankan" possibility for now
 struct FourPlayerRiichi<T: MahjongWall, State> {
     players: FourPlayerStorage,
     wall: T,
@@ -36,12 +36,10 @@ struct FourPlayerRiichi<T: MahjongWall, State> {
     _marker: PhantomData<State>,
 }
 
-struct Ready;
 struct WaitingForDiscard;
 struct WaitingForCalls;
-struct WaitingForKan;
 
-impl<T: MahjongWall> NeedDiscard for FourPlayerRiichi<T, WaitingForDiscard> {
+impl<Wall: MahjongWall> NeedDiscard for FourPlayerRiichi<Wall, WaitingForDiscard> {
     type_bounds!();
     fn discard(self, info: DiscardDecision) -> OutsideQuery!() {
         todo!("mutate current player hand, and draw if nobody can call");
@@ -55,10 +53,12 @@ impl<T: MahjongWall> NeedDiscard for FourPlayerRiichi<T, WaitingForDiscard> {
     }
 }
 
-impl<T: MahjongWall> NeedCalls for FourPlayerRiichi<T, WaitingForCalls> {
+impl<Wall: MahjongWall> NeedCalls for FourPlayerRiichi<Wall, WaitingForCalls> {
     type_bounds!();
-    fn discard(self, info: CallsDecision) -> OutsideQuery!() {
+    type PlayerType = NoCalls;
+    fn take(self, info: CallsDecision<Self::PlayerType>) -> OutsideQuery!() {
         if !info.calls.is_empty() {
+            todo!("draw a tile");
             return RoundEvent::Draw(FourPlayerRiichi {
                 _marker: PhantomData::<WaitingForDiscard>,
                 players: self.players,
@@ -81,31 +81,29 @@ impl<T: MahjongWall> NeedCalls for FourPlayerRiichi<T, WaitingForCalls> {
         }
 
         // should have a match
-        let calls = info
-            .calls
-            .iter()
-            .filter(|x| !matches!(x, Call::Ron(_)))
-            .min()
-            .expect("we already checked the possibilities of no matches");
+        // do pons ?
+        let calls = info.calls.iter().filter(|x| matches!(x, Call::Pon(_)));
+        // this does not worky
 
-        todo!()
+        todo!("")
     }
 }
 
-impl<T: MahjongWall> NeedChankan for FourPlayerRiichi<T, WaitingForKan> {
-    type_bounds!();
-    fn ron(self, chan_kan_decision: ChanKanDecision) -> OutsideQuery!() {
-        if chan_kan_decision.robbing_players.is_empty() {
-            return RoundEvent::Draw(FourPlayerRiichi {
-                _marker: PhantomData::<WaitingForDiscard>,
-                players: self.players,
-                wall: self.wall,
-                current_player: self.current_player.get_next(),
-                main_wind: self.main_wind,
-            });
-        }
+impl<Wall: MahjongWall> FourPlayerRiichi<Wall, WaitingForDiscard> {
+    fn do_rons(&self) {}
+}
 
-        // robbing a kan
-        RoundEvent::EndState(todo!())
+impl<Wall: MahjongWall, State> FourPlayerRiichi<Wall, State> {
+    fn draw(mut self) -> Option<FourPlayerRiichi<Wall, WaitingForDiscard>> {
+        let tile = self.wall.draw()?;
+        Some(self.add_tile_to_hand(self.current_player, tile))
+    }
+
+    fn add_tile_to_hand(
+        mut self,
+        hand: Wind,
+        tile: MahjongTile,
+    ) -> FourPlayerRiichi<Wall, WaitingForDiscard> {
+        todo!()
     }
 }

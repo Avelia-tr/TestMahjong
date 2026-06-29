@@ -68,7 +68,7 @@ impl NumberTile {
             // [UNSAFE] 1 is safe value to init
             9 => unsafe { Self::new_unchecked(1) },
             // [UNSAFE] 2..9 are safe value to init
-            0..9 => unsafe { Self::new_unchecked(self.0 + 1) },
+            1..9 => unsafe { Self::new_unchecked(self.0 + 1) },
             _ => unreachable!("invalid state : Invariant self.0 is >= 1 and <= 9 violated"),
         }
     }
