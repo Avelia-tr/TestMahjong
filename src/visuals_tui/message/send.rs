@@ -48,10 +48,10 @@ pub fn send_message(message: Message) -> Result<(), MessageError> {
         .to_message_error(&message)?;
     out.flush().to_message_error(&message)?;
 
-    let is_error_suppressed = match message.1 {
-        Some(SupressLevel::Everything | SupressLevel::SuppressSuccess) => true,
-        _ => false,
-    };
+    let is_error_suppressed = matches!(
+        message.1,
+        Some(SupressLevel::Everything | SupressLevel::SuppressSuccess)
+    );
 
     if !is_error_suppressed {
         let _ = parse_error_kitty(&guard)

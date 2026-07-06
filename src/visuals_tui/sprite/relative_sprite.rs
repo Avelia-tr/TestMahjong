@@ -25,7 +25,7 @@ impl Sprite for RelativeSprite {
 }
 
 impl RelativeSprite {
-    fn display_child(&self, image: &Image) -> Result<(), message::MessageError> {
+    fn display_child(&self, _image: &Image) -> Result<(), message::MessageError> {
         // display childs recursively
         todo!()
     }

@@ -1,13 +1,5 @@
-use std::{
-    io::{self, Read, Write},
-    thread::sleep,
-    time::Duration,
-};
-
 use crate::visuals_tui::{
-    display_example::example_moving_image,
-    kitty_input::{ComprehensiveInput, ComprehensiveInputArgs},
-    utils::Rawmodder,
+    display_example::example_moving_image, kitty_input::ComprehensiveInputArgs,
 };
 
 #[allow(unused)]

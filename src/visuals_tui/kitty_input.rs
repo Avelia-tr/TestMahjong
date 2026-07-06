@@ -1,6 +1,5 @@
 use std::{
-    env::args,
-    io::{self, BufRead, Read, Write, stdin, stdout},
+    io::{self, Read, Write, stdin, stdout},
     thread,
     time::Duration,
 };

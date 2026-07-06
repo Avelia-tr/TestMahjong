@@ -95,4 +95,8 @@ impl MahjongHand {
     pub fn can_call(&self) -> bool {
         todo!()
     }
+
+    pub fn add_tile(&mut self, tile: MahjongTile) {
+        self.hand.push(HandBlock::Unit(tile));
+    }
 }

@@ -1,8 +1,8 @@
-use std::io::{self, BufRead};
+use std::io::{self};
 
 use derive_more::Display;
 
-use crate::visuals_tui::{ansi_codes::DELIMITER, kitty_input::ComprehensiveInputArgs};
+use crate::visuals_tui::kitty_input::ComprehensiveInputArgs;
 
 pub enum KeyInput {
     Character(u8),
@@ -63,6 +63,7 @@ pub enum InputEventError {
 
 impl InputEvent {
     // CSI unicode-key-code[:alternate-key-codes] ; modifiers[:event-type] [; text-as-codepoints] u
+    #[allow(unused)]
     pub fn parse(buffer: Vec<u8>, args: ComprehensiveInputArgs) -> Result<Self, InputEventError> {
         if !has_csi(&buffer) {
             return Err(InputEventError::UnrecognizedHeader);
