@@ -1,7 +1,11 @@
 use std::io::Write;
 
-use crate::game::tiles::{MahjongTile, Wind};
+use crate::game::{
+    event_data::PlayerId,
+    tiles::{MahjongTile, Wind},
+};
 
+// [todo] revise API ?
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 enum HandBlock {
     Unit(MahjongTile),
@@ -11,41 +15,6 @@ enum HandBlock {
     Pon(MahjongTile, MahjongTile, MahjongTile),
     OpenKan(MahjongTile, MahjongTile, MahjongTile, MahjongTile),
     AddedKan(MahjongTile, MahjongTile, MahjongTile, MahjongTile),
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-pub enum DrawResult {
-    Tsumogiri(MahjongTile),
-    Tedashi(MahjongTile),
-    Riichi(MahjongTile),
-    Win,
-    Kan(MahjongTile),
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-pub enum CallResult {
-    Pass,
-    Chii {
-        called_tile: MahjongTile,
-        othertiles: [MahjongTile; 2],
-        wind: Wind,
-    },
-    Pon {
-        called_tile: MahjongTile,
-        othertiles: [MahjongTile; 2],
-        wind: Wind,
-    },
-    OpenKan {
-        called_tile: MahjongTile,
-        othertiles: [MahjongTile; 2],
-        wind: Wind,
-    },
-    AddedKan {
-        called_tile: MahjongTile,
-        add_tile: MahjongTile,
-        othertiles: [MahjongTile; 2],
-        wind: Wind,
-    },
 }
 
 #[derive(Debug)]
@@ -68,6 +37,10 @@ pub struct CallPossibility {
 }
 
 impl MahjongHand {
+    pub fn make_riichi(&mut self) {
+        self.riichi = true;
+    }
+
     pub fn is_closed(&self) -> bool {
         self.hand.iter().all(|x| x.is_closed())
     }
@@ -79,6 +52,7 @@ impl MahjongHand {
                 .iter()
                 .position(|x| matches!(x, HandBlock::Unit(i)))
             else {
+                // ?
                 todo!()
             };
 
@@ -88,6 +62,7 @@ impl MahjongHand {
         self.hand.push(HandBlock::Pon(tiles[0], tiles[1], tiles[2]));
     }
 
+    // [todo] revise API ?
     pub fn chii(&mut self, tiles: [MahjongTile; 3]) {
         todo!();
     }

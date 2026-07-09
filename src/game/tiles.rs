@@ -6,6 +6,7 @@ pub struct MahjongTile {
     red: bool,
     // other shit probably ?
     // idk
+    // uid maybe ???
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]

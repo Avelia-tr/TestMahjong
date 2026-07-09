@@ -1,8 +1,5 @@
-use std::marker::PhantomData;
-
 use crate::game::{
-    GameResult,
-    event_data::{Call, CallDecision, DiscardDecision},
+    event_data::{Call, CallDecision, DiscardDecision, GameResult},
     tiles::Wind,
 };
 

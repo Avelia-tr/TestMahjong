@@ -1,4 +1,5 @@
 use crate::game::{
+    event_data::PlayerId,
     hands::MahjongHand,
     tiles::{MahjongTile, Wind},
     wall::MahjongWall,
@@ -14,9 +15,3 @@ mod hands;
 mod tiles;
 #[allow(unused)]
 mod wall;
-
-enum GameResult {
-    Ron { winning_hand: MahjongHand },
-    Tsumo(MahjongHand, Wind),
-    RinshanKaihou,
-}
