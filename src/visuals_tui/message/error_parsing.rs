@@ -16,7 +16,7 @@ pub fn parse_error_kitty(
         .strip_suffix("\x1B\x5c")
         .ok_or(ParsingError::NoSuffixFound)?;
 
-    let Some((_parameter, terminal_answer)) = answer_stripped.split_once(";") else {
+    let Some((_parameter, terminal_answer)) = answer_stripped.split_once(';') else {
         return Err(ParsingError::NoDelimiterFound);
     };
 
@@ -26,7 +26,7 @@ pub fn parse_error_kitty(
         return Ok(Ok(OKAnswer));
     }
 
-    match terminal_answer.split_once(":") {
+    match terminal_answer.split_once(':') {
         Some(x) => Ok(Err(x.into())),
         None => Err(ParsingError::InvalidlyformedTerminalAnswer),
     }

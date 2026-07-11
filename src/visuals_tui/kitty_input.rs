@@ -37,8 +37,10 @@ Args!(
 
 pub struct ComprehensiveInput(());
 
+#[allow(clippy::unused_self)]
+// we want to know that we have a value of  self to do the functions
 impl ComprehensiveInput {
-    pub fn enable(args: ComprehensiveInputArgs) -> io::Result<Self> {
+    pub fn enable(args: &ComprehensiveInputArgs) -> io::Result<Self> {
         let mut out = stdout().lock();
 
         out.write_all(ansi_codes::EXTENSIVE_INPUT_START)?;

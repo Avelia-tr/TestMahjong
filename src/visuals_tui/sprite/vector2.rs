@@ -62,7 +62,7 @@ pub struct Vector2u {
 impl ops::SubAssign for Vector2u {
     fn sub_assign(&mut self, rhs: Self) {
         self.x = self.x.saturating_sub(rhs.x);
-        self.y = self.y.saturating_sub(rhs.y)
+        self.y = self.y.saturating_sub(rhs.y);
     }
 }
 

@@ -27,10 +27,10 @@ pub enum DragonTiles {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Wind {
-    East,
-    South,
-    West,
-    North,
+    East = 0,
+    South = 1,
+    West = 2,
+    North = 3,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -64,7 +64,7 @@ impl NumberTile {
         }
     }
 
-    fn get_next_one(&self) -> Self {
+    fn get_next_one(self) -> Self {
         match self.0 {
             // [UNSAFE] 1 is safe value to init
             9 => unsafe { Self::new_unchecked(1) },
@@ -76,7 +76,7 @@ impl NumberTile {
 }
 
 impl DragonTiles {
-    pub fn get_next_one(&self) -> Self {
+    pub fn get_next_one(self) -> Self {
         match self {
             Self::White => Self::Green,
             Self::Green => Self::Red,
@@ -86,7 +86,7 @@ impl DragonTiles {
 }
 
 impl Wind {
-    pub fn get_next(&self) -> Self {
+    pub fn get_next(self) -> Self {
         match self {
             Self::East => Self::South,
             Self::South => Self::West,
@@ -94,14 +94,25 @@ impl Wind {
             Self::North => Self::East,
         }
     }
+
+    pub fn relative_position(self, other: Wind) -> usize {
+        let self_value: usize = self as usize;
+        let other_value = other as usize;
+
+        if self_value > other_value {
+            other_value + 4 - self_value
+        } else {
+            other_value - self_value
+        }
+    }
 }
 
 impl MahjongTilesIdentity {
-    pub fn is_honor(&self) -> bool {
+    pub fn is_honor(self) -> bool {
         matches!(self, Self::Dragon(_) | Self::Wind(_))
     }
 
-    pub fn is_terminal(&self) -> bool {
+    pub fn is_terminal(self) -> bool {
         matches!(
             self,
             Self::Man(NumberTile(1 | 9))
@@ -110,7 +121,7 @@ impl MahjongTilesIdentity {
         )
     }
 
-    pub fn get_dora(&self) -> Self {
+    pub fn get_dora(self) -> Self {
         match self {
             Self::Man(x) => Self::Man(x.get_next_one()),
             Self::Pin(x) => Self::Pin(x.get_next_one()),
@@ -141,7 +152,7 @@ impl Display for Wind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str(match self {
             Self::East => "Ea",
-            Self::South => "No",
+            Self::South => "So",
             Self::West => "We",
             Self::North => "No",
         })
@@ -153,9 +164,28 @@ impl Display for MahjongTilesIdentity {
         match self {
             Self::Dragon(x) => x.fmt(f),
             Self::Wind(x) => x.fmt(f),
-            Self::Man(x) => f.write_fmt(format_args!("{}m", x)),
-            Self::Pin(x) => f.write_fmt(format_args!("{}p", x)),
-            Self::Sou(x) => f.write_fmt(format_args!("{}s", x)),
+            Self::Man(x) => f.write_fmt(format_args!("{x}m")),
+            Self::Pin(x) => f.write_fmt(format_args!("{x}p")),
+            Self::Sou(x) => f.write_fmt(format_args!("{x}s")),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::game::tiles::Wind;
+
+    #[test]
+    fn test_wind_relative_value() {
+        assert_eq!(Wind::East.relative_position(Wind::East), 0);
+        assert_eq!(Wind::East.relative_position(Wind::South), 1); // doesn't work
+        assert_eq!(Wind::East.relative_position(Wind::West), 2);
+        assert_eq!(Wind::East.relative_position(Wind::North), 3);
+        assert_eq!(Wind::South.relative_position(Wind::East), 3);
+        assert_eq!(Wind::South.relative_position(Wind::South), 0);
+        assert_eq!(Wind::South.relative_position(Wind::West), 1);
+        assert_eq!(Wind::South.relative_position(Wind::North), 2);
+        assert_eq!(Wind::North.relative_position(Wind::East), 1);
+        assert_eq!(Wind::West.relative_position(Wind::West), 0);
     }
 }

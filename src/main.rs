@@ -20,7 +20,7 @@ const ARGS_INPUT: ComprehensiveInputArgs = ComprehensiveInputArgs {
 };
 
 fn main() {
-    example_moving_image().unwrap();
+    example_moving_image().expect("no io error");
     //return;
     //let meow = display_example::example_moving_image();
     //

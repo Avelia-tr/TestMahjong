@@ -1,3 +1,7 @@
+// those do not make sense with the meaning of the code
+// maybe try to recode the interface ?
+#![allow(clippy::trivially_copy_pass_by_ref)]
+#![allow(clippy::ref_option)]
 use std::num::NonZeroU32;
 
 pub struct Message(pub Action, pub Option<SupressLevel>);
@@ -215,6 +219,7 @@ impl<T: EncodeMessage> EncodeMessage for Option<T> {
     }
 }
 
+#[allow(clippy::match_same_arms)]
 impl EncodeMessage for SupressLevel {
     fn encode(&self) -> Vec<u8> {
         match self {
@@ -307,7 +312,7 @@ impl EncodeMessage for TransmitParam {
         buffer.extend(self.placement_id.encode());
         buffer.extend(self.compression_style.encode());
 
-        encode_custom(&mut buffer, self.last_chunk, b",O=", |x| {
+        encode_custom(&mut buffer, self.last_chunk, b",O=", |&x| {
             if x { Vec::from(b"0") } else { Vec::from(b"1") }
         });
 
@@ -324,7 +329,7 @@ impl EncodeMessage for CursorMovementMode {
     }
 }
 
-fn int_to_bytes(x: impl ToString) -> Vec<u8> {
+fn int_to_bytes(x: &impl ToString) -> Vec<u8> {
     x.to_string().into_bytes()
 }
 
@@ -340,7 +345,7 @@ impl EncodeMessage for ImageDisplayParam {
         encode_custom(&mut buffer, self.offset_tile_y, b",Y=", int_to_bytes);
         encode_custom(&mut buffer, self.column_span, b",c=", int_to_bytes);
         encode_custom(&mut buffer, self.row_span, b",r=", int_to_bytes);
-        encode_custom(&mut buffer, self.placeholder_unicode, b",U=", |x| {
+        encode_custom(&mut buffer, self.placeholder_unicode, b",U=", |&x| {
             if x { Vec::from(b"1") } else { Vec::from(b"0") }
         });
         buffer.extend(self.cursor_movement_mode.encode());
@@ -360,11 +365,11 @@ fn encode_custom<T>(
     buffer: &mut Vec<u8>,
     option: Option<T>,
     prefix: &[u8],
-    mapper: impl Fn(T) -> Vec<u8>,
+    mapper: impl Fn(&T) -> Vec<u8>,
 ) {
     if let Some(value) = option {
         buffer.extend_from_slice(prefix);
-        buffer.extend(mapper(value));
+        buffer.extend(mapper(&value));
     }
 }
 
@@ -403,7 +408,7 @@ impl EncodeMessage for DeletionMessage {
             DeletionMessage::AnimationFrame => Vec::new(),
             DeletionMessage::AtX(integer) => encode_deletion_coord(integer, b",x="),
             DeletionMessage::AtY(integer) => encode_deletion_coord(integer, b",y="),
-            DeletionMessage::AtZ(integer) => encode_deletion_coord(integer, b",y="),
+            DeletionMessage::AtZ(integer) => encode_deletion_coord(integer, b",z="),
             DeletionMessage::AtXY { x, y } => encode_deletion_xy(x, y),
             DeletionMessage::AtXYZ { x, y, z } => encode_deletion_xyz(x, y, z),
             DeletionMessage::InRangeID { start, end } => encode_deletion_range(start, end),

@@ -5,7 +5,14 @@ use std::{
 
 use crate::visuals_tui::{
     image::image_type::ImageType,
-    message::{error::*, message_enum::*, send},
+    message::{
+        error::{LoadError, MessageError},
+        message_enum::{
+            Action, ImageDisplayParam, ImageId, ImagePlacementId, Message, SupressLevel,
+            TransmitParam,
+        },
+        send,
+    },
 };
 
 // just to guarantee not repeating id in a feasable time
@@ -35,6 +42,8 @@ impl Image {
         ))
     }
 
+    #[allow(clippy::needless_pass_by_value)]
+    // we want to consume ImageType
     pub fn load(image: ImageType) -> Result<ImageId, LoadError> {
         if !image.verify_integrity()? {
             return Err(LoadError::FileNotFound);
@@ -81,15 +90,15 @@ impl Image {
 impl Clone for Image {
     fn clone(&self) -> Self {
         self.used_placement_id.fetch_add(1, Ordering::SeqCst);
-        let new_placement_id =
-            match ImagePlacementId::new(self.used_placement_id.load(Ordering::Acquire)) {
-                Some(x) => x,
-                None => {
-                    self.used_placement_id.fetch_add(1, Ordering::SeqCst);
-                    ImagePlacementId::new(self.used_placement_id.load(Ordering::Acquire))
-                        .expect("valid id since we just passed through 0")
-                }
-            };
+        let new_placement_id = if let Some(x) =
+            ImagePlacementId::new(self.used_placement_id.load(Ordering::Acquire))
+        {
+            x
+        } else {
+            self.used_placement_id.fetch_add(1, Ordering::SeqCst);
+            ImagePlacementId::new(self.used_placement_id.load(Ordering::Acquire))
+                .expect("valid id since we just passed through 0")
+        };
 
         Self {
             id: self.id,

@@ -24,7 +24,7 @@ pub struct Player {
 }
 
 impl Player {
-    pub fn get_id(&self) -> PlayerId {
+    pub fn get_id(self) -> PlayerId {
         self.id
     }
 }
@@ -126,5 +126,27 @@ impl CallDecision {
                 _ => None,
             })
             .collect()
+    }
+}
+
+pub trait CallInfo {
+    fn get_origin(&self) -> PlayerId;
+}
+
+impl CallInfo for ChiiCallInfo {
+    fn get_origin(&self) -> PlayerId {
+        self.origin
+    }
+}
+
+impl CallInfo for PonCallInfo {
+    fn get_origin(&self) -> PlayerId {
+        self.origin
+    }
+}
+
+impl CallInfo for KanCallInfo {
+    fn get_origin(&self) -> PlayerId {
+        self.origin
     }
 }

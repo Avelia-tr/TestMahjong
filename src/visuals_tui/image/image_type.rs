@@ -17,8 +17,7 @@ impl ImageType {
 
     pub fn get_type(&self) -> ImageFormat {
         match self {
-            ImageType::PNGPath(_) => ImageFormat::Png,
-            ImageType::PNGData(_) => ImageFormat::Png,
+            ImageType::PNGPath(_) | ImageType::PNGData(_) => ImageFormat::Png,
         }
     }
 

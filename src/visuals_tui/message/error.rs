@@ -21,15 +21,15 @@ impl<T, T2: Into<MessageErrorKind>> ToMessageError<T> for Result<T, T2> {
     fn to_message_error(self, message: &Message) -> Result<T, MessageError> {
         self.map_err(|kind| MessageError {
             message: String::from_utf8(message.encode())
-                .unwrap()
-                .replace("\x1b", "␛"),
+                .expect("message.encode should be valid utf-8")
+                .replace('\x1b', "␛"),
             kind: kind.into(),
         })
     }
 
     fn to_error_no_msg(self) -> Result<T, MessageError> {
         self.map_err(|kind| MessageError {
-            message: "".into(),
+            message: String::new(),
             kind: kind.into(),
         })
     }

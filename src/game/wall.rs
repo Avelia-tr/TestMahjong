@@ -18,7 +18,7 @@ pub trait MahjongWall {
 
 #[rustfmt::skip]
 pub mod impos {
-    use super::*;
+    use super::{MahjongWall, MahjongTile};
 
     pub enum ImpossibleWall {}
 

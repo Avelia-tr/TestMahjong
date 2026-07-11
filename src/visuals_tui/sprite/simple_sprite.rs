@@ -21,7 +21,7 @@ impl SimpleSprite {
         // using Option<Image> would weaken the invariant that "all SimpleSprite can be displayed"
         Image::new(image_type).map(|image| Self {
             image,
-            position: Default::default(),
+            position: Vector2u::default(),
             z_index: Default::default(),
         })
     }
@@ -29,7 +29,7 @@ impl SimpleSprite {
     pub fn from_image(image: Image) -> Self {
         Self {
             image,
-            position: Default::default(),
+            position: Vector2u::default(),
             z_index: Default::default(),
         }
     }

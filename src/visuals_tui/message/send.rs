@@ -14,6 +14,8 @@ const PREFIX: &[u8] = b"\x1B_G";
 const SEPARATOR: &[u8] = b";";
 const SUFFIX: &[u8] = b"\x1B\\";
 
+#[allow(clippy::needless_pass_by_value)]
+// we want to consume Message
 pub fn send_message_with_payload(header: Message, payload: Vec<u8>) -> Result<(), MessageError> {
     let guard = Rawmodder::enable().to_message_error(&header)?;
 
@@ -39,6 +41,8 @@ pub fn send_message_with_payload(header: Message, payload: Vec<u8>) -> Result<()
     Ok(())
 }
 
+#[allow(clippy::needless_pass_by_value)]
+// we want to consume Message
 pub fn send_message(message: Message) -> Result<(), MessageError> {
     let guard = Rawmodder::enable().to_message_error(&message)?;
 

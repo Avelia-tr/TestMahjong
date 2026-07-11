@@ -1,7 +1,7 @@
 use std::io::Write;
 
 use crate::game::{
-    event_data::PlayerId,
+    event_data::{ChiiCallInfo, PlayerId, PonCallInfo},
     tiles::{MahjongTile, Wind},
 };
 
@@ -42,33 +42,25 @@ impl MahjongHand {
     }
 
     pub fn is_closed(&self) -> bool {
-        self.hand.iter().all(|x| x.is_closed())
+        fn fun_name(x: &HandBlock) -> bool {
+            x.is_closed()
+        }
+        self.hand.iter().all(HandBlock::is_closed)
     }
 
-    pub fn pon(&mut self, tiles: [MahjongTile; 3]) {
-        for i in tiles {
-            let Some(x) = self
-                .hand
-                .iter()
-                .position(|x| matches!(x, HandBlock::Unit(i)))
-            else {
-                // ?
-                todo!()
-            };
+    pub fn pon(&mut self, info: PonCallInfo) {
+        //for i in tiles { let Some(x) = self .hand .iter() .position(|x| matches!(x, HandBlock::Unit(i))) else { // ? todo!() };
 
-            self.hand.swap_remove(x);
-        }
+        //self.hand.swap_remove(x);
+        //}
 
-        self.hand.push(HandBlock::Pon(tiles[0], tiles[1], tiles[2]));
+        //self.hand.push(HandBlock::Pon(tiles[0], tiles[1], tiles[2]));
+        todo!("do pon")
     }
 
     // [todo] revise API ?
-    pub fn chii(&mut self, tiles: [MahjongTile; 3]) {
-        todo!();
-    }
-
-    pub fn can_call(&self) -> bool {
-        todo!()
+    pub fn chii(&mut self, info: ChiiCallInfo) {
+        todo!("do_chii");
     }
 
     pub fn add_tile(&mut self, tile: MahjongTile) {

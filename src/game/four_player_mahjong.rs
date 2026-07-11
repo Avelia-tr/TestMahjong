@@ -4,7 +4,8 @@ use crate::game::{
     container::FourPlayerStorage,
     event::{NormalMahjongMachine, Request},
     event_data::{
-        Call, CallDecision, DiscardDecision, DiscardTile, GameResult, KanDecision, PlayerId,
+        Call, CallDecision, CallInfo, DiscardDecision, DiscardTile, GameResult, KanDecision,
+        PlayerId,
     },
     hands::{self, MahjongHand},
     tiles::{MahjongTile, Wind},
@@ -63,7 +64,7 @@ type FourPMachine<T> = NormalMahjongMachine<WallDiscard<T>, WallCalls<T>, FinalW
 impl<Wall: MahjongWall> Request<CallDecision> for WallCalls<Wall> {
     type Machine = FourPMachine<Wall>;
 
-    fn fullfill(self, need: CallDecision) -> Self::Machine {
+    fn fullfill(mut self, need: CallDecision) -> Self::Machine {
         if need.is_empty() {
             let next_player = self.current_player.get_next();
             return self.draw(next_player);
@@ -81,28 +82,15 @@ impl<Wall: MahjongWall> Request<CallDecision> for WallCalls<Wall> {
             );
         }
 
-        if let kans = need.get_kans()
-            && !kans.is_empty()
-        {
-            for i in kans
-                .iter()
-                .filter_map(|x| self.players.wind_from_id(x.origin).map(|y| (y, x)))
-            {
-                todo!("refactor I think I've got a better structure in mind")
-            }
-        }
+        let hand = self.players.hand_from_wind_mut(self.current_player);
 
-        if let pons = need.get_pons()
-            && !pons.is_empty()
-        {
-            todo!("deal with pons")
-        }
-
-        if let chiis = need.get_kans()
-            && !chiis.is_empty()
-        {
-            todo!("deal with chiis")
-        }
+        if let Some(kan) = self.get_first_call(&need.get_kans()) {
+            todo!("make kan happen")
+        } else if let Some(pon) = self.get_first_call(&need.get_pons()) {
+            todo!("make pon happen")
+        } else if let Some(chii) = self.get_first_call(&need.get_chii()) {
+            todo!("make chii happen")
+        };
 
         unreachable!("every case checked")
     }
@@ -140,7 +128,7 @@ impl<Wall: MahjongWall, State: ActiveState> FourPlayerRiichi<Wall, State> {
     }
 }
 
-impl<Wall: MahjongWall, T> FourPlayerRiichi<Wall, T> {
+impl<Wall: MahjongWall, TState> FourPlayerRiichi<Wall, TState> {
     unsafe fn transition_state<NextState>(
         self,
         state: NextState,
@@ -156,6 +144,16 @@ impl<Wall: MahjongWall, T> FourPlayerRiichi<Wall, T> {
 
     pub fn get_current_player_id(&self) -> PlayerId {
         self.players.player_from_wind(self.current_player).get_id()
+    }
+}
+
+impl<W: MahjongWall> WallCalls<W> {
+    fn get_first_call<'a, C: CallInfo>(&self, calls: &'a [C]) -> Option<&'a C> {
+        calls
+            .iter()
+            .filter_map(|x| self.players.wind_from_id(x.get_origin()).map(|w| (w, x)))
+            .min_by_key(|x| self.current_player.relative_position(x.0))
+            .map(|x| x.1)
     }
 }
 

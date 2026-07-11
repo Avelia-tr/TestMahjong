@@ -19,5 +19,5 @@ pub fn get_window_size() -> std::io::Result<Vec<u8>> {
 
     drop(guard);
 
-    Ok(s.to_vec())
+    Ok(s.clone())
 }

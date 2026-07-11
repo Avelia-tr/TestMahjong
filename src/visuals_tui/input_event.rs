@@ -31,6 +31,8 @@ pub enum KeyState {
     Release,
 }
 
+#[allow(clippy::struct_excessive_bools)]
+// we actually use this as a product type
 #[derive(Default, Debug)]
 pub struct KeyModifier {
     shift: bool,
@@ -64,8 +66,10 @@ pub enum InputEventError {
 impl InputEvent {
     // CSI unicode-key-code[:alternate-key-codes] ; modifiers[:event-type] [; text-as-codepoints] u
     #[allow(unused)]
-    pub fn parse(buffer: Vec<u8>, args: ComprehensiveInputArgs) -> Result<Self, InputEventError> {
-        if !has_csi(&buffer) {
+    pub fn parse(buffer: &[u8], args: &ComprehensiveInputArgs) -> Result<Self, InputEventError> {
+        const DELIMITER_COLON: u8 = b':';
+
+        if !has_csi(buffer) {
             return Err(InputEventError::UnrecognizedHeader);
         }
 
@@ -80,8 +84,6 @@ impl InputEvent {
         let Some(first_part) = bits.next() else {
             return Err(InputEventError::UnrecognizedPayload);
         };
-
-        const DELIMITER_COLON: u8 = b':';
 
         let codes = first_part.split(|x| *x == DELIMITER_COLON);
 
