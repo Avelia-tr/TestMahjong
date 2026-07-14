@@ -22,9 +22,9 @@ struct FourPlayerRiichi<T: MahjongWall, State> {
 }
 
 impl<Wall: MahjongWall> FourPlayerRiichi<Wall, UnreadyState> {
-    pub fn new(wall: Wall) -> Self {
+    pub fn new(mut wall: Wall) -> Self {
         FourPlayerRiichi {
-            players: todo!("implement a way to init storage"),
+            players: FourPlayerStorage::new(&mut wall).expect("big enough wall"),
             wall,
             current_player: Wind::East,
             main_wind: Wind::East,
@@ -33,16 +33,7 @@ impl<Wall: MahjongWall> FourPlayerRiichi<Wall, UnreadyState> {
     }
 
     pub fn start_game(self) -> FourPMachine<Wall> {
-        // setup ?
-        // shuffle the wall
-        // fill the hands
-        FourPMachine::Discard(FourPlayerRiichi {
-            _marker: WaitingForDiscard,
-            players: self.players,
-            wall: self.wall,
-            current_player: self.current_player,
-            main_wind: self.main_wind,
-        })
+        unsafe { self.transition_state(WaitingForDiscard).draw(Wind::East) }
     }
 }
 
@@ -70,6 +61,15 @@ impl<Wall: MahjongWall> Request<CallDecision> for WallCalls<Wall> {
             return self.draw(next_player);
         }
 
+        let Some(called_on) = self
+            .players
+            .player_from_wind_mut(self.current_player)
+            .call_last()
+        else {
+            let next_player = self.current_player.get_next();
+            return self.draw(next_player);
+        };
+
         if let rons = need.get_rons()
             && !rons.is_empty()
         {
@@ -82,17 +82,40 @@ impl<Wall: MahjongWall> Request<CallDecision> for WallCalls<Wall> {
             );
         }
 
-        let hand = self.players.hand_from_wind_mut(self.current_player);
+        let next_player: Wind;
 
         if let Some(kan) = self.get_first_call(&need.get_kans()) {
-            todo!("make kan happen")
-        } else if let Some(pon) = self.get_first_call(&need.get_pons()) {
-            todo!("make pon happen")
-        } else if let Some(chii) = self.get_first_call(&need.get_chii()) {
-            todo!("make chii happen")
-        };
+            next_player = self.players.wind_from_id(kan.origin).expect("valid player");
 
-        unreachable!("every case checked")
+            todo!("implement kan")
+        } else if let Some(pon) = self.get_first_call(&need.get_pons()) {
+            next_player = self.players.wind_from_id(pon.origin).expect("valid player");
+
+            self.players
+                .hand_from_id_mut(pon.origin)
+                .expect("already panicked")
+                .pon(called_on, *pon);
+        } else if let Some(chii) = self.get_first_call(&need.get_chii()) {
+            next_player = self
+                .players
+                .wind_from_id(chii.origin)
+                .expect("valid player");
+
+            self.players
+                .hand_from_id_mut(chii.origin)
+                .expect("already panicked")
+                .chii(called_on, *chii);
+        } else {
+            // [todo] maybe handle it differently ? put a warning and do fuck all idk
+            unreachable!(
+                "UNHANDLED CALL in FourPlayerRiichi panicking since we reached an unrepairable state"
+            )
+        }
+
+        FourPMachine::Discard(FourPlayerRiichi {
+            current_player: next_player,
+            ..unsafe { self.transition_state(WaitingForDiscard) }
+        })
     }
 }
 

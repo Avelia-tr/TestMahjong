@@ -5,13 +5,13 @@ use crate::game::{
     wall::MahjongWall,
 };
 
-mod container;
-mod event;
-mod event_data;
-mod four_player_mahjong;
-#[allow(unused)]
-mod hands;
-#[allow(unused)]
-mod tiles;
-#[allow(unused)]
-mod wall;
+pub mod container;
+pub mod event;
+pub mod event_data;
+pub mod four_player_mahjong;
+pub mod hand_data;
+pub mod hands;
+pub mod rand;
+pub mod tiles;
+pub mod wall;
+pub mod wall_implementation;

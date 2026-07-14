@@ -1,29 +1,26 @@
-use crate::visuals_tui::{
-    display_example::example_moving_image, kitty_input::ComprehensiveInputArgs,
+use crate::game::{
+    rand::{DeterministicRng, Seed, lehmer::LehmerRNG},
+    wall_implementation::{
+        classic::ClassicWall,
+        wall_generation::{ProtoWall, classic_wall_tiles},
+    },
 };
 
 #[allow(unused)]
 mod game;
 
-#[allow(dead_code)]
-mod visuals_tui;
-
-const MEOW_EXTENSIVE_START: &[u8] = b"\x1B\x5B>8u";
-const MEOW_EXTENSIVE_STOP: &[u8] = b"\x1B\x5B>1u";
-
-const ARGS_INPUT: ComprehensiveInputArgs = ComprehensiveInputArgs {
-    disambiguate_escape_codes: true,
-    event_types: false,
-    alternate_keys: false,
-    all_keys_as_escape_codes: true,
-    associated_text: false,
-};
-
 fn main() {
-    example_moving_image().expect("no io error");
-    //return;
-    //let meow = display_example::example_moving_image();
-    //
+    //example_moving_image().expect("no io error");
 
-    //let guard = Rawmodder::enable().unwrap(); let meow = ComprehensiveInput::enable(ARGS_INPUT).unwrap(); for i in 0..5 { println!("{i}:{:?}", meow.read_input(&guard).unwrap()); } drop(meow);
+    let mut meow = classic_wall_tiles();
+    meow.shuffle(&mut LehmerRNG::new().set_seed(Seed(5)));
+    let meow2: String = meow.iter().map(|x| x.identity.to_string()).collect();
+
+    println!("{meow2}");
+    println!();
+    println!();
+
+    let meowingwall = ClassicWall::new_non_suffling(meow);
+
+    dbg!(meowingwall);
 }

@@ -5,19 +5,20 @@ use crate::game::tiles::{MahjongTile, MahjongTilesIdentity, NumberTile};
 
 pub trait MahjongWall {
     fn draw(&mut self) -> Option<MahjongTile>;
-    fn draw_dead_wall(&mut self) -> MahjongTile;
+    fn draw_dead_wall(&mut self) -> Option<MahjongTile>;
     fn reveal_dora(&mut self) -> Option<MahjongTile>;
 
-    fn get_dora(&self, index: usize) -> Option<MahjongTile>;
-    fn get_ura_dora(&self, index: usize) -> Option<MahjongTile>;
-    fn get_visible_doras(&self, index: usize) -> &[MahjongTile];
-    fn get_visible_ura_doras(&self, index: usize) -> &[MahjongTile];
+    fn peek_dora(&self, index: usize) -> Option<MahjongTile>;
+    fn peek_ura_dora(&self, index: usize) -> Option<MahjongTile>;
+    fn get_visible_doras(&self) -> &[MahjongTile];
+    fn get_visible_ura_doras(&self) -> &[MahjongTile];
 
     fn poll_tile_remaining(&self) -> usize;
 }
 
 #[rustfmt::skip]
 pub mod impos {
+
     use super::{MahjongWall, MahjongTile};
 
     pub enum ImpossibleWall {}
@@ -27,17 +28,18 @@ pub mod impos {
 
         fn draw(&mut self) -> Option<MahjongTile> { todo!() }
 
-        fn draw_dead_wall(&mut self) -> MahjongTile { todo!() }
+        fn get_visible_doras(&self) -> &[MahjongTile] { todo!() }
 
         fn reveal_dora(&mut self) -> Option<MahjongTile> { todo!() }
 
-        fn get_dora(&self, index: usize) -> Option<MahjongTile> { todo!() }
+        fn get_visible_ura_doras(&self) -> &[MahjongTile] { todo!() }
 
-        fn get_ura_dora(&self, index: usize) -> Option<MahjongTile> { todo!() }
+        fn draw_dead_wall(&mut self) -> Option<MahjongTile> { todo!() }
 
-        fn get_visible_doras(&self, index: usize) -> &[MahjongTile] { todo!() }
+        fn peek_dora(&self, index: usize) -> Option<MahjongTile> { todo!() }
 
-        fn get_visible_ura_doras(&self, index: usize) -> &[MahjongTile] { todo!() }
+        fn peek_ura_dora(&self, index: usize) -> Option<MahjongTile> { todo!() }
+
     }
 
     #[allow(dead_code)]

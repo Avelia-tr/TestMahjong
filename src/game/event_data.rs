@@ -24,6 +24,14 @@ pub struct Player {
 }
 
 impl Player {
+    pub fn new_temp(id: u32) -> Self {
+        println!("[Warning] BAD IMPLEMENTATION");
+        Self {
+            id: PlayerId(id),
+            score: 0,
+        }
+    }
+
     pub fn get_id(self) -> PlayerId {
         self.id
     }
@@ -31,14 +39,16 @@ impl Player {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DiscardTileType {
-    Tsumogiri(MahjongTile),
-    Tedashi(MahjongTile),
+    Tsumogiri,
+    Tedashi,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DiscardTile {
     pub kind: DiscardTileType,
     pub riichi: bool,
+    pub stolen: bool,
+    pub tile: MahjongTile,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -61,19 +71,19 @@ pub enum Call {
     Chii(ChiiCallInfo),
 }
 
-#[derive(PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub struct KanCallInfo {
     pub origin: PlayerId,
     pub tiles: [MahjongTile; 3],
 }
 
-#[derive(PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub struct PonCallInfo {
     pub origin: PlayerId,
     pub tiles: [MahjongTile; 2],
 }
 
-#[derive(PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub struct ChiiCallInfo {
     pub origin: PlayerId,
     pub tiles: [MahjongTile; 2],

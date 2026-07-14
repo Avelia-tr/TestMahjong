@@ -1,32 +1,15 @@
-use std::io::Write;
+use std::{cmp, io::Write};
 
 use crate::game::{
-    event_data::{ChiiCallInfo, PlayerId, PonCallInfo},
+    event_data::{CallInfo, ChiiCallInfo, PlayerId, PonCallInfo},
+    hand_data::{call_info::MadeCall, hand_block::HandBlock},
     tiles::{MahjongTile, Wind},
 };
-
-// [todo] revise API ?
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-enum HandBlock {
-    Unit(MahjongTile),
-    ClosedKan(MahjongTile, MahjongTile, MahjongTile, MahjongTile),
-
-    Chii(MahjongTile, MahjongTile, MahjongTile),
-    Pon(MahjongTile, MahjongTile, MahjongTile),
-    OpenKan(MahjongTile, MahjongTile, MahjongTile, MahjongTile),
-    AddedKan(MahjongTile, MahjongTile, MahjongTile, MahjongTile),
-}
 
 #[derive(Debug)]
 pub struct MahjongHand {
     hand: Vec<HandBlock>,
     riichi: bool,
-}
-
-impl HandBlock {
-    pub fn is_closed(&self) -> bool {
-        matches!(self, Self::Unit(_) | Self::ClosedKan(_, _, _, _))
-    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -37,33 +20,77 @@ pub struct CallPossibility {
 }
 
 impl MahjongHand {
+    pub fn new(hand: Vec<HandBlock>) -> Self {
+        Self {
+            hand,
+            riichi: false,
+        }
+    }
+
     pub fn make_riichi(&mut self) {
         self.riichi = true;
     }
 
     pub fn is_closed(&self) -> bool {
-        fn fun_name(x: &HandBlock) -> bool {
-            x.is_closed()
-        }
         self.hand.iter().all(HandBlock::is_closed)
     }
 
-    pub fn pon(&mut self, info: PonCallInfo) {
-        //for i in tiles { let Some(x) = self .hand .iter() .position(|x| matches!(x, HandBlock::Unit(i))) else { // ? todo!() };
+    pub fn pon(&mut self, tile_called: MahjongTile, info: PonCallInfo) {
+        let mut new_hand: Vec<HandBlock> = self
+            .hand
+            .iter()
+            .filter_map(|x| match x {
+                HandBlock::Unit(mahjong_tile) if info.tiles.contains(mahjong_tile) => None,
+                x => Some(*x),
+            })
+            .collect();
 
-        //self.hand.swap_remove(x);
-        //}
+        debug_assert!(new_hand.len() + 2 == self.hand.len());
 
-        //self.hand.push(HandBlock::Pon(tiles[0], tiles[1], tiles[2]));
-        todo!("do pon")
+        new_hand.push(HandBlock::Pon(MadeCall::new(tile_called, info)));
+
+        self.hand = new_hand;
     }
 
     // [todo] revise API ?
-    pub fn chii(&mut self, info: ChiiCallInfo) {
+    pub fn chii(&mut self, tile_called: MahjongTile, info: ChiiCallInfo) {
+        debug_assert!(
+            is_valid_chii(tile_called, info),
+            "assertion failed, not a valid chii"
+        );
+
+        let mut new_hand: Vec<HandBlock> = self
+            .hand
+            .iter()
+            .filter_map(|x| match x {
+                HandBlock::Unit(mahjong_tile) if info.tiles.contains(mahjong_tile) => None,
+                x => Some(*x),
+            })
+            .collect();
+
+        debug_assert!(new_hand.len() + 2 == self.hand.len());
+
+        new_hand.push(HandBlock::Chii(MadeCall::new(tile_called, info)));
+
+        self.hand = new_hand;
         todo!("do_chii");
     }
 
     pub fn add_tile(&mut self, tile: MahjongTile) {
         self.hand.push(HandBlock::Unit(tile));
     }
+}
+
+fn is_valid_chii(tile_called: MahjongTile, info: ChiiCallInfo) -> bool {
+    let mut test = [&[tile_called], &info.tiles[..]].concat();
+
+    test.sort();
+
+    for [prev, next] in test.array_windows() {
+        if !prev.follows(*next) {
+            return false;
+        }
+    }
+
+    true
 }

@@ -2,20 +2,33 @@ use std::{fmt::Display, hint::unreachable_unchecked, num::NonZeroI8};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct MahjongTile {
-    identity: MahjongTilesIdentity,
-    red: bool,
+    pub identity: MahjongTilesIdentity,
+    pub red: bool,
     // other shit probably ?
     // idk
     // uid maybe ???
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, Eq, PartialOrd, Ord)]
 pub enum MahjongTilesIdentity {
     Man(NumberTile),
     Pin(NumberTile),
     Sou(NumberTile),
     Wind(Wind),
     Dragon(DragonTiles),
+}
+
+impl PartialEq for MahjongTilesIdentity {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::Man(l0), Self::Man(r0))
+            | (Self::Pin(l0), Self::Pin(r0))
+            | (Self::Sou(l0), Self::Sou(r0)) => l0 == r0,
+            (Self::Wind(l0), Self::Wind(r0)) => l0 == r0,
+            (Self::Dragon(l0), Self::Dragon(r0)) => l0 == r0,
+            _ => false,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -49,9 +62,32 @@ impl MahjongTile {
             red: false,
         }
     }
+
+    pub const fn follows(self, other: Self) -> bool {
+        use MahjongTilesIdentity as MTI;
+        match (self.identity.get_dora(), other.identity) {
+            (MTI::Man(l0), MTI::Man(r0))
+            | (MTI::Pin(l0), MTI::Pin(r0))
+            | (MTI::Sou(l0), MTI::Sou(r0)) => l0.0 == r0.0,
+            // while "get_dora" gets the "next" tile for every identity, honor tile don't really
+            // have a next tile and are better treated individually here
+            _ => false,
+        }
+    }
+
+    pub const fn is_honor(self) -> bool {
+        self.identity.is_honor()
+    }
+
+    pub fn is_terminal(self) -> bool {
+        self.identity.is_terminal()
+    }
 }
 
 impl NumberTile {
+    // this is a valid state
+    pub const N1: NumberTile = NumberTile(1);
+
     pub const unsafe fn new_unchecked(number: u8) -> Self {
         Self(number)
     }
@@ -64,19 +100,19 @@ impl NumberTile {
         }
     }
 
-    fn get_next_one(self) -> Self {
+    const fn get_next_one(self) -> Self {
         match self.0 {
             // [UNSAFE] 1 is safe value to init
             9 => unsafe { Self::new_unchecked(1) },
             // [UNSAFE] 2..9 are safe value to init
             1..9 => unsafe { Self::new_unchecked(self.0 + 1) },
-            _ => unreachable!("invalid state : Invariant self.0 is >= 1 and <= 9 violated"),
+            _ => unreachable!(),
         }
     }
 }
 
 impl DragonTiles {
-    pub fn get_next_one(self) -> Self {
+    pub const fn get_next_one(self) -> Self {
         match self {
             Self::White => Self::Green,
             Self::Green => Self::Red,
@@ -86,7 +122,7 @@ impl DragonTiles {
 }
 
 impl Wind {
-    pub fn get_next(self) -> Self {
+    pub const fn get_next(self) -> Self {
         match self {
             Self::East => Self::South,
             Self::South => Self::West,
@@ -108,11 +144,11 @@ impl Wind {
 }
 
 impl MahjongTilesIdentity {
-    pub fn is_honor(self) -> bool {
+    pub const fn is_honor(self) -> bool {
         matches!(self, Self::Dragon(_) | Self::Wind(_))
     }
 
-    pub fn is_terminal(self) -> bool {
+    pub const fn is_terminal(self) -> bool {
         matches!(
             self,
             Self::Man(NumberTile(1 | 9))
@@ -121,7 +157,7 @@ impl MahjongTilesIdentity {
         )
     }
 
-    pub fn get_dora(self) -> Self {
+    pub const fn get_dora(self) -> Self {
         match self {
             Self::Man(x) => Self::Man(x.get_next_one()),
             Self::Pin(x) => Self::Pin(x.get_next_one()),
