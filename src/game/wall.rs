@@ -1,7 +1,4 @@
-use std::env;
-use std::sync::Arc;
-
-use crate::game::tiles::{MahjongTile, MahjongTilesIdentity, NumberTile};
+use crate::game::tiles::MahjongTile;
 
 pub trait MahjongWall {
     fn draw(&mut self) -> Option<MahjongTile>;

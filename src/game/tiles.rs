@@ -1,4 +1,4 @@
-use std::{fmt::Display, hint::unreachable_unchecked, num::NonZeroI8};
+use std::fmt::Display;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct MahjongTile {

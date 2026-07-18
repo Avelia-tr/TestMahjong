@@ -1,10 +1,3 @@
-use crate::game::{
-    event_data::PlayerId,
-    hands::MahjongHand,
-    tiles::{MahjongTile, Wind},
-    wall::MahjongWall,
-};
-
 pub mod container;
 pub mod event;
 pub mod event_data;

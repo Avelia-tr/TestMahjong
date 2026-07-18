@@ -1,9 +1,6 @@
 use std::{cmp, fmt::Debug};
 
-use crate::game::{
-    event_data::CallInfo,
-    tiles::{MahjongTile, Wind},
-};
+use crate::game::{event_data::CallInfo, tiles::MahjongTile};
 
 // Invariant to hold : this is a call that was made
 #[derive(Clone, Copy)]

@@ -6,6 +6,7 @@ use crate::game::{
     wall::MahjongWall,
 };
 
+#[derive(Debug)]
 pub struct FourPlayerStorage {
     east: PlayerStorage,
     south: PlayerStorage,
@@ -13,6 +14,7 @@ pub struct FourPlayerStorage {
     north: PlayerStorage,
 }
 
+#[derive(Debug)]
 pub struct PlayerStorage {
     pub hand: MahjongHand,
     player: Player,

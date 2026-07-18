@@ -1,7 +1,4 @@
-use crate::game::{
-    hands::MahjongHand,
-    tiles::{MahjongTile, Wind},
-};
+use crate::game::tiles::MahjongTile;
 
 pub enum GameResult {
     Ron {

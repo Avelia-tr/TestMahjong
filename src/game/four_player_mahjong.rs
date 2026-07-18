@@ -1,19 +1,15 @@
-use std::marker::PhantomData;
-
 use crate::game::{
     container::FourPlayerStorage,
     event::{NormalMahjongMachine, Request},
     event_data::{
-        Call, CallDecision, CallInfo, DiscardDecision, DiscardTile, GameResult, KanDecision,
-        PlayerId,
+        CallDecision, CallInfo, DiscardDecision, DiscardTile, GameResult, KanDecision, PlayerId,
     },
-    hands::{self, MahjongHand},
-    tiles::{MahjongTile, Wind},
+    tiles::Wind,
     wall::MahjongWall,
 };
 
 // ignoring "chankan" possibility for now
-struct FourPlayerRiichi<T: MahjongWall, State> {
+pub struct FourPlayerRiichi<T: MahjongWall, State> {
     players: FourPlayerStorage,
     wall: T,
     current_player: Wind,

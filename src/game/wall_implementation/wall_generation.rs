@@ -32,7 +32,7 @@ pub fn creates_sets_tile(tile_type: MahjongTilesIdentity) -> Vec<MahjongTile> {
 
 pub trait ProtoWall: IntoIterator<Item = MahjongTile> {
     fn make_tile_red(&mut self, kind: MahjongTilesIdentity, amount: usize) -> &mut Self;
-    fn shuffle(&mut self, rand: &mut impl DeterministicRng) -> &mut Self;
+    fn shuffle(self, rand: &mut impl DeterministicRng) -> Self;
 }
 
 impl ProtoWall for Vec<MahjongTile> {
@@ -48,7 +48,7 @@ impl ProtoWall for Vec<MahjongTile> {
     }
 
     // pass a random generator ?
-    fn shuffle(&mut self, rand: &mut impl DeterministicRng) -> &mut Self {
+    fn shuffle(mut self, rand: &mut impl DeterministicRng) -> Self {
         const SHUFFLE_DEPTH: usize = 300;
         let self_len: u64 = self.len().try_into().expect("should work ?");
         for i in rand
